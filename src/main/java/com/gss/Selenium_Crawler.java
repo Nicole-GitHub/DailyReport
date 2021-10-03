@@ -28,7 +28,8 @@ public class Selenium_Crawler {
 
 	protected static List<Map<String, String>> getMailContent(
 			String path, String[] inboxName, String account,
-			String pwd, String mailScrolltoDate) {
+			String pwd, Calendar cal) {
+		
 		driver = null;
 		List<WebElement> listElement;
 		List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
@@ -61,12 +62,9 @@ public class Selenium_Crawler {
 			Thread.sleep(1000);
 
 			// 登入Mail
-			element = driver.findElement(By.id("username"));
-			element.sendKeys(account);
-			element = driver.findElement(By.id("password"));
-			element.sendKeys(pwd);
-			element = driver.findElement(By.className("DwtButton"));
-			element.click();
+			driver.findElement(By.id("username")).sendKeys(account);
+			driver.findElement(By.id("password")).sendKeys(pwd);
+			driver.findElement(By.className("DwtButton")).click();
 
 			// 等待三秒以確保頁面加載完整
 			Thread.sleep(3000);
@@ -89,7 +87,7 @@ public class Selenium_Crawler {
 				/**
 				 * 內容加載後截取信件list區塊 再拆分為主旨、內容兩部份放入map中
 				 */
-				if (scrollDown(mailScrolltoDate)) {
+				if (scrollDown(cal)) {
 					element = driver.findElement(By.id("zl__TV-main__rows"));
 					html = new Html(element.getAttribute("outerHTML"));
 					listElement = driver.findElements(By.className("Row"));
@@ -161,8 +159,10 @@ public class Selenium_Crawler {
 
 					/**
 					 * 將RQ的狀態回寫到對應LOG檔檔名上
+					 * 整理出失敗的job資訊寫入jobF.txt
 					 */
-					LogRename.logRename(qcLogList, chromeDefaultDownloadPath);
+					if(download)
+						LogRename.logRename(path, qcLogList, chromeDefaultDownloadPath);
 				}
 			}
 
@@ -207,35 +207,48 @@ public class Selenium_Crawler {
 	/**
 	 * 滑動頁面
 	 */
-	private static boolean scrollDown(String mailScrolltoDate) {
+	private static boolean scrollDown(Calendar cal) {
 		if (driver != null) {
 			try {
+				SimpleDateFormat sdfyyMd = new SimpleDateFormat("yy/M/d");
 				element = driver.findElement(By.id("zl__TV-main__rows"));
 				html = new Html(element.getAttribute("outerHTML"));
 				// 滑動頁面直到信件時間出現欲檢查日期的前一天出現為止
 				String scroll = "go";
-				while (StringUtil.isBlank(html.xpath("//li[contains(@aria-label,', " + mailScrolltoDate + "')]").get())
-						&& "go".equals(scroll)) {
-					html = new Html(element.getAttribute("outerHTML"));
-					// 執行頁面滾動的JS語法
-					String height1 = ((JavascriptExecutor) driver)
-							.executeScript("var element = document.getElementById('zl__TV-main__rows');"
-									+ "var height1 = element.scrollHeight;"
-									+ "element.scroll(0,height1);"
-									+ "return height1;")
-							.toString();
-					Thread.sleep(1000);
-					String height2 = ((JavascriptExecutor) driver)
-							.executeScript("var element = document.getElementById('zl__TV-main__rows');"
-									+ "var height2 = element.scrollHeight;"
-									+ "return height2;")
-							.toString();
-//					System.out.println("height1=>"+height1);
-//					System.out.println("height2=>"+height2);
-					scroll = Integer.parseInt(height1) == Integer.parseInt(height2) ? "stop" : "go";
-//					System.out.println("scroll=>"+scroll);
-					// 给页面预留加载时间
-					Thread.sleep(1000);
+				int chkMailDateLen = 5;
+				String[] calArr = new String[chkMailDateLen];
+				for (int i = 0; i < chkMailDateLen; i++) {
+					calArr[i] = sdfyyMd.format(cal.getTime());
+					cal.add(Calendar.DATE, -1);
+				}
+				cal.add(Calendar.DATE, +5);
+				while ("go".equals(scroll)
+					&& StringUtil.isBlank(html.xpath("//li[contains(@aria-label,', " + calArr[0] + "')]").get())
+					&& StringUtil.isBlank(html.xpath("//li[contains(@aria-label,', " + calArr[1] + "')]").get())
+					&& StringUtil.isBlank(html.xpath("//li[contains(@aria-label,', " + calArr[2] + "')]").get())
+					&& StringUtil.isBlank(html.xpath("//li[contains(@aria-label,', " + calArr[3] + "')]").get())
+					&& StringUtil.isBlank(html.xpath("//li[contains(@aria-label,', " + calArr[4] + "')]").get())
+					) {
+
+					if ("go".equals(scroll)) {
+						html = new Html(element.getAttribute("outerHTML"));
+						// 執行頁面滾動的JS語法
+						String height1 = ((JavascriptExecutor) driver)
+								.executeScript("var element = document.getElementById('zl__TV-main__rows');"
+										+ "var height1 = element.scrollHeight;"
+										+ "element.scroll(0,height1);"
+										+ "return height1;")
+								.toString();
+						Thread.sleep(1000);
+						String height2 = ((JavascriptExecutor) driver)
+								.executeScript("var element = document.getElementById('zl__TV-main__rows');"
+										+ "var height2 = element.scrollHeight;"
+										+ "return height2;")
+								.toString();
+						scroll = Integer.parseInt(height1) == Integer.parseInt(height2) ? "stop" : "go";
+						// 给页面预留加载时间
+						Thread.sleep(1000);
+					}
 				}
 				System.out.println("加載中...");
 				return true;

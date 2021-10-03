@@ -4,12 +4,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,15 +22,14 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 public class RunDailyReport {
-	static final String yy1 = "20"; // 西元年前兩碼
 	static final String mailStartText = " - 您好, 〔("; // job 寄的 mail 開頭
-	static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-	static Integer dateCell = 0, dataRow = 0, chkDate = 0, mailItemInit = 0; // 從第0封mail開始取;
+	static final SimpleDateFormat sdfYYYYMMDD = new SimpleDateFormat("yyyyMMdd");
+	static Integer dateCell = 0, dataRow = 0, chkDate = 0;
 	static String JobMonth = "", JobDate = "", excelMonth = "", DailyReportExcel = "", account = "", pwd = "";
 	static boolean isPrint;
 	static Row targetRow;
 	static Cell targetCell, previouCell, targetChkCell, previouChkCell;
-	static ArrayList<Map<String, String>> listF, list;
+	static ArrayList<Map<String, String>> listF, list, listFforSheet3;
 	static String[] inboxName;
 
 	/**
@@ -69,7 +66,7 @@ public class RunDailyReport {
 
 		try {
 			// 整理 MAIL內容
-			mailContent(path);
+			parserMailContent(path);
 
 			File f = new File(DailyReportExcel);
 			workbook = Tools.getWorkbook(DailyReportExcel, f);
@@ -77,7 +74,7 @@ public class RunDailyReport {
 
 			// 日誌的月份 年月(六碼)
 			excelMonth = sheet1.getRow(0).getCell(0).getStringCellValue();
-			excelMonth = excelMonth.substring(1, 7);
+			excelMonth = excelMonth.substring(0, 7).trim();
 
 			// 寫入 "JobList" 頁籤的狀態，並整理出失敗的Job
 			writeSheet1(sheet1);
@@ -103,6 +100,13 @@ public class RunDailyReport {
 				ex.printStackTrace();
 			}
 		}
+
+		// 將失敗的job寫入file中 (填寫日誌清單_2021)
+		String txt = "";
+		for (Map<String, String> map : listF)
+			if (!txt.contains(map.get("jobName")))
+				txt += map.get("jobName") + "\r\n";
+		Tools.writeListFtoFile(path, txt);
 	}
 
 	/**
@@ -110,42 +114,39 @@ public class RunDailyReport {
 	 * 
 	 * @return 整理後的list
 	 *         List<Map<String, String>>
-	 *         map.put("jobRSDate", jobRSDate);
-	 *         map.put("jobRSTime", jobRSTime);
-	 *         map.put("jobRSDateTime", jobRSDate + jobRSTime);
-	 *         map.put("jobRSOriDateTime", jobRSOriDate + jobRSTime);
-	 *         map.put("jobPeriod", jobPeriod); map.put("jobSeq", jobSeq);
-	 *         map.put("jobEName", jobEName); map.put("jobName", jobName);
-	 *         map.put("jobRunRS", jobRunRS);
+	 *         map.put("jobRSDate", jobRSDate); // 日誌日期 YYYYMMDD
+	 *         map.put("jobRSTime", jobRSTime); // job時間 HHmm
+	 *         map.put("jobRSDateTime", jobRSDate + " " + jobRSTime); // 日誌日期時間 YYYYMMDD HHmm
+	 *         map.put("jobRSOriDateTime", jobRSOriDate + " " + jobRSTime); // job原日期時間 (後面比對會用到)
+	 *         map.put("jobPeriod", jobPeriod); // job執行區間
+	 *         map.put("jobSeq", jobSeq); // jobSeq
+	 *         map.put("jobEName", jobEName); // 英文名
+	 *         map.put("jobName", jobName); // 中文名
+	 *         map.put("jobRunRS", jobRunRS); // 執行結果
 	 * @throws ParseException
 	 */
-	private static void mailContent(String path) throws ParseException {
+	private static void parserMailContent(String path) throws ParseException {
 		boolean isPm = false;
-		String jobRSText = "", jobRSDate = "", jobRSOriDate = "", jobRSTime = "",
-				jobPeriod = "", jobSeq = "", jobEName = "", jobName = "",
-				jobRunRS = "", yy2 = "", mm = "", dd = "", hh = "", mi = "", time = "";
+		int hhInt = 0, arrLen = 0;
+		String jobRSText = "", jobRSDate = "", jobRSOriDate = "", jobRSTime = "", jobPeriod = "",
+				jobSeq = "", jobEName = "", jobName = "", jobRunRS = "", time = "";
+		String[] jobMailTitleArr;
 		Map<String, String> map;
 		list = new ArrayList<Map<String, String>>();
 		List<Map<String, String>> listMail;
 
 		// 取 昨、今、明 三天的日期
 		Calendar cal = Calendar.getInstance();
-		String today = sdf.format(cal.getTime());
+		String today = sdfYYYYMMDD.format(cal.getTime());
 		cal.add(Calendar.DATE, -1);
-		String yesterday = sdf.format(cal.getTime());
-		cal.add(Calendar.DATE, +2);
-		String tomorrow = sdf.format(cal.getTime());
-		String[] jobMailTitleArr, jobRSDateArr;
-		int arrLen = 0;
+		String yesterday = sdfYYYYMMDD.format(cal.getTime());
 
-		cal.setTime(sdf.parse(String.valueOf(chkDate)));
+		// listMail
+		cal.setTime(sdfYYYYMMDD.parse(String.valueOf(chkDate)));
 		cal.add(Calendar.DATE, -2);
-		SimpleDateFormat mailSDF = new SimpleDateFormat("yy/M/d");
-		String mailScrolltoDate = mailSDF.format(cal.getTime());
+		listMail = Selenium_Crawler.getMailContent(path, inboxName, account, pwd, cal);
 
-		// maillist
-		listMail = Selenium_Crawler.getMailContent(path, inboxName, account, pwd, mailScrolltoDate);
-
+		SimpleDateFormat sdfYYYYMMDDHHmm = new SimpleDateFormat("yyyyMMdd HH:mm");
 		for (Map<String, String> mailMap : listMail) {
 
 			System.out.println(mailMap.get("title"));
@@ -177,53 +178,35 @@ public class RunDailyReport {
 				 * 切割時間點為上午9點
 				 * (9:00前屬當天，9:00後屬隔天)
 				 */
-				time = jobMailTitleArr[arrLen - 1].trim();
-				isPm = time.substring(0, 2).equals("下午");
-				time = time.substring(2);
-				hh = time.substring(0, time.indexOf(":"));
-				hh = hh.length() < 2 ? "0" + hh : hh; // 不滿兩位前面補0
-				hh = "12".equals(hh) ? "00" : hh;
-				mi = time.substring(time.indexOf(":") + 1);
-				// mail收到的時間 (上午:1,下午:2)
-				jobRSTime = (isPm ? "2" : "1") + hh + mi;
-				// job 執行區間
-//				jobPeriod = jobMailTitleArr[4].startsWith("收件匣") ? jobMailTitleArr[3] : jobMailTitleArr[4];
-				jobPeriod = jobMailTitleArr[arrLen - 5]; // 因job中文名稱內可能會有多個逗號，故抓倒數第五位陣列值
-				jobPeriod = jobPeriod.substring(jobPeriod.lastIndexOf("_") + 1, jobPeriod.lastIndexOf("("));
+				time = jobMailTitleArr[arrLen - 1].trim(); // 下午10:22
+				isPm = time.substring(0, 2).equals("下午"); // 上午false 下午true
+				time = time.substring(2); // 10:22
+				hhInt = Integer.parseInt(time.substring(0, time.indexOf(":"))); // 10
+				hhInt = hhInt == 12 ? 0 : hhInt; // 0 ~ 11
+				hhInt = hhInt + (isPm ? 12 : 0); // 0 ~ 23
+				// mail收到的時間(24小時制)
+				jobRSTime = hhInt + time.substring(time.indexOf(":")); // 22:22
 				// job 所屬日期 (日誌用)
 				jobRSDate = jobMailTitleArr[arrLen - 2].trim();
 				// job 原日期 (後面刪除相同job時使用)
-				jobRSOriDate = jobRSDate.equals("昨天") ? yesterday : jobRSDate.equals("今天") ? today : "";
-				if (jobRSDate.lastIndexOf("/") > 0) {
-					jobRSDateArr = jobRSDate.split("/");
-					yy2 = jobRSDateArr[0];
-					mm = jobRSDateArr[1];
-					dd = jobRSDateArr[2].substring(0, jobRSDateArr[2].length() - 1);
-					jobRSOriDate = yy1 + yy2 + Tools.getLen2(mm) + Tools.getLen2(dd);
-					/**
-					 * "上午 9:00" 前屬當天
-					 * "上午 9:00" 後屬隔天
-					 */
-					if (isPm || (!isPm && Integer.valueOf(hh) > 8)) {
-						dd = String.valueOf((Integer.valueOf(dd) + 1));
-					}
-					jobRSDate = yy1 + yy2 + Tools.getLen2(mm) + Tools.getLen2(dd);
-
-					// 時間點為 "昨天, 上午 9:00" 前
-				} else if (jobRSDate.equals("昨天") && !isPm && Integer.valueOf(hh) <= 8) {
-					jobRSDate = yesterday;
-
-					/**
-					 * 時間點為 "今天, 上午 9:00" 前
-					 * 或 "昨天, 下午"
-					 * 或 "昨天, 上午 9:00" 後
-					 */
-				} else if ((jobRSDate.equals("今天") && !isPm && Integer.valueOf(hh) <= 8)
-						|| (jobRSDate.equals("昨天") && (isPm || (!isPm && Integer.valueOf(hh) > 8)))) {
-					jobRSDate = today;
-				} else {
-					jobRSDate = tomorrow;
-				}
+				jobRSOriDate = jobRSDate.equals("昨天") ? yesterday
+						: jobRSDate.equals("今天") ? today 
+								: new SimpleDateFormat("yyyyMMdd").format(
+										new SimpleDateFormat("yy/M/d").parse(
+												jobRSDate.substring(0, jobRSDate.length() - 1)));
+				System.out.println("=== jobRSDate : " + jobRSDate + " , jobRSOriDate : " + jobRSOriDate
+						+ " , jobRSTime : " + jobRSTime);
+				
+				cal.setTime(sdfYYYYMMDDHHmm.parse(jobRSOriDate + " " + jobRSTime));
+				System.out.println("===== jobRSOriDate sdfYYYYMMDDHHmm ====> " + sdfYYYYMMDDHHmm.format(cal.getTime()));
+				
+				// job 執行區間
+				jobPeriod = jobMailTitleArr[arrLen - 5]; // 因job中文名稱內可能會有多個逗號，故抓倒數第五位陣列值
+				jobPeriod = jobPeriod.substring(jobPeriod.lastIndexOf("_") + 1, jobPeriod.lastIndexOf("("));
+				if (hhInt > 8)
+					cal.add(Calendar.DATE, 1);
+				// job 所屬日期 (日誌用)
+				jobRSDate = sdfYYYYMMDD.format(cal.getTime());
 
 				// 是否為這次要整理的job日期範圍
 				isPrint = Integer.parseInt(jobRSDate) >= chkDate;
@@ -242,25 +225,26 @@ public class RunDailyReport {
 					map = new HashMap<String, String>();
 					map.put("jobRSDate", jobRSDate);
 					map.put("jobRSTime", jobRSTime);
-					map.put("jobRSDateTime", jobRSDate + jobRSTime);
-					map.put("jobRSOriDateTime", jobRSOriDate + jobRSTime);
+					map.put("jobRSDateTime", jobRSDate + " " + jobRSTime);
+					map.put("jobRSOriDateTime", jobRSOriDate + " " + jobRSTime);
 					map.put("jobPeriod", jobPeriod);
 					map.put("jobSeq", jobSeq);
 					map.put("jobEName", jobEName);
 					map.put("jobName", jobName);
 					map.put("jobRunRS", jobRunRS);
 					list.add(map);
-//					System.out.println("======================== Start ========================");
-//					System.out.println("jobRSDate=>"+jobRSDate);
-//					System.out.println("jobRSTime=>"+ jobRSTime);
-//					System.out.println("jobRSDateTime=>"+ jobRSDate + jobRSTime);
-//					System.out.println("jobRSOriDateTime=>"+ jobRSOriDate + jobRSTime);
-//					System.out.println("jobPeriod=>"+ jobPeriod);
-//					System.out.println("jobSeq=>"+ jobSeq);
-//					System.out.println("jobEName=>"+ jobEName);
-//					System.out.println("jobName=>"+ jobName);
-//					System.out.println("jobRunRS=>"+ jobRunRS);
-//					System.out.println("======================== End ========================");
+
+					System.out.println("======================== Start ========================");
+					System.out.println("jobRSDate 日誌日期 => " + jobRSDate);
+					System.out.println("jobRSTime job時間 => " + jobRSTime);
+					System.out.println("jobRSDateTime 日誌日期時間 => " + jobRSDate + " " + jobRSTime);
+					System.out.println("jobRSOriDateTime job原日期時間 => " + jobRSOriDate + " " + jobRSTime);
+					System.out.println("jobPeriod job執行區間 => " + jobPeriod);
+					System.out.println("jobSeq => " + jobSeq);
+					System.out.println("jobEName 英文名=> " + jobEName);
+					System.out.println("jobName 中文名 => " + jobName);
+					System.out.println("jobRunRS 執行結果 => " + jobRunRS);
+					System.out.println("======================== End ========================");
 				}
 			}
 		}
@@ -275,8 +259,8 @@ public class RunDailyReport {
 				if (chkMap.get("jobEName").equals(chkMap2.get("jobEName"))
 						&& chkMap.get("jobPeriod").equals(chkMap2.get("jobPeriod"))
 						&& chkMap.get("jobRSDate").equals(chkMap2.get("jobRSDate"))
-						&& Long.valueOf(chkMap.get("jobRSOriDateTime")) < Long
-								.valueOf(chkMap2.get("jobRSOriDateTime"))) {
+						&& Long.valueOf(chkMap.get("jobRSOriDateTime").replaceAll("[ :]", "")) < Long
+								.valueOf(chkMap2.get("jobRSOriDateTime").replaceAll("[ :]", ""))) {
 					System.out.println("=====list remove=====" + ", jobRSDate = " + chkMap.get("jobRSDate")
 							+ ", jobRSTime = " + chkMap.get("jobRSTime") + ", jobRSDateTime = "
 							+ chkMap.get("jobRSDateTime") + ", jobRSOriDateTime = " + chkMap.get("jobRSOriDateTime")
@@ -296,6 +280,7 @@ public class RunDailyReport {
 	 * @throws Exception
 	 */
 	private static void writeSheet1(Sheet sheet1) throws Exception {
+		listFforSheet3 = new ArrayList<Map<String, String>>();
 		listF = new ArrayList<Map<String, String>>();
 		for (Map<String, String> map : list) {
 			JobMonth = map.get("jobRSDate").substring(0, 6);
@@ -319,21 +304,34 @@ public class RunDailyReport {
 						targetCell = targetRow.getCell(dateCell + 1);
 						if (dataRow > 0 && (targetCell.getCellType() == Cell.CELL_TYPE_BLANK
 								|| map.get("jobRunRS").equals("F"))) {
-							targetCell.setCellValue(map.get("jobRunRS"));
-							System.out.println("changeCellValue====,dataRow=" + dataRow + ", dateCell=" + dateCell
+							
+							// 寫入Sheet1的狀態
+							if (map.get("jobRunRS").equals("S")
+									|| (map.get("jobRunRS").equals("F")
+											&& "V".equals(targetRow.getCell(dateCell).getStringCellValue())))
+								targetCell.setCellValue(map.get("jobRunRS"));
+
+							// 將應檢查的失敗Job寫入JobF.txt
+							if (map.get("jobRunRS").equals("F")
+									&& "V".equals(targetRow.getCell(dateCell).getStringCellValue()))
+								listF.add(map);
+
+							// 將失敗的Job放入job待辦頁籤中 (不論是否應檢查)
+							if ("F".equals(map.get("jobRunRS")))
+								listFforSheet3.add(map);
+							
+							System.out.println("changeCellValue====> dataRow=" + dataRow + ", dateCell=" + dateCell
 									+ ", Value=" + map.get("jobRunRS") + ", jobRSDateTime=" + map.get("jobRSDateTime")
 									+ ", jobPeriod=" + map.get("jobPeriod"));
+							
 							for (Entry<String, String> ent : map.entrySet()) {
 								System.out.println(ent.getKey() + " : " + ent.getValue() + " , ");
 							}
-							// 將失敗的Job放入listF中
-							if ("F".equals(map.get("jobRunRS")))
-								listF.add(map);
 						}
 					}
 				}
 			}else {
-				throw new Exception("日誌月份錯誤");
+				System.out.println("日誌月份錯誤");
 			}
 		}
 
@@ -367,8 +365,12 @@ public class RunDailyReport {
 					targetChkCell = row.getCell(dateCell);
 					targetCell = row.getCell(dateCell + 1);
 
-					// X: 前一天狀態為X，且今天應檢查，且今天尚未壓狀態
-					if (previouCell != null && row.getRowNum() > 1 && previouCell.getCellType() == Cell.CELL_TYPE_STRING
+					/**
+					 * X: 前一天狀態為X && 今天應檢查 && 今天尚未壓狀態
+					 * 月初不會有X
+					 */
+					if (previouCell != null && row.getRowNum() > 1 
+							&& previouCell.getCellType() == Cell.CELL_TYPE_STRING
 							&& previouCell.getStringCellValue().equalsIgnoreCase("X")
 							&& targetChkCell.getCellType() == Cell.CELL_TYPE_STRING
 							&& targetChkCell.getStringCellValue().equalsIgnoreCase("V")
@@ -377,16 +379,21 @@ public class RunDailyReport {
 						targetCell.setCellValue("X");
 					}
 
-					// Z: 前一天不應檢查，且今天應檢查，且今天尚未壓狀態
+					/**
+					 * Z: 前一天不應檢查 && 今天應檢查 && 今天尚未壓狀態
+					 * 含月初的判斷
+					 */
 					if (previouChkCell != null && row.getRowNum() > 1
-							&& previouChkCell.getCellType() == Cell.CELL_TYPE_BLANK
+							&& (previouChkCell.getCellType() == Cell.CELL_TYPE_BLANK
+							|| (previouChkCell.getCellType() == Cell.CELL_TYPE_STRING
+							&& !previouChkCell.getStringCellValue().equalsIgnoreCase("V")))
 							&& targetChkCell.getCellType() == Cell.CELL_TYPE_STRING
 							&& targetChkCell.getStringCellValue().equalsIgnoreCase("V")
 							&& targetCell.getCellType() == Cell.CELL_TYPE_BLANK) {
 						System.out.println("Change Value Z : Row=" + row.getRowNum() + ", Cell=" + dateCell);
 						targetCell.setCellValue("Z");
 					}
-
+					
 					// 需再執行一次有公式的欄位才會更新欄位值
 					if (targetCell != null && targetCell.getCellType() == Cell.CELL_TYPE_FORMULA) {
 						targetCell.setCellFormula(targetCell.getCellFormula());
@@ -413,7 +420,7 @@ public class RunDailyReport {
 		lastRowNum = sheet3.getLastRowNum();
 
 		// 為了讓list能由後往前讀，故使用ListIterator
-		ListIterator<Map<String, String>> listIterator = listF.listIterator();
+		ListIterator<Map<String, String>> listIterator = listFforSheet3.listIterator();
 		// 先讓迭代器的指標移到最尾筆
 		while (listIterator.hasNext()) {
 			System.out.println("待辦 job : " + listIterator.next());
@@ -473,5 +480,33 @@ public class RunDailyReport {
 		}
 		return true;
 	}
+	
+	/**
+	 * 將失敗的job寫入file中 (填寫日誌清單_2021)
+	 * 
+	 * @param path
+	 */
+	private static void writeListFtoFile(String path) {
+		String txt = "";
+	    String destFile = path + "/jobF.txt";
+	    FileOutputStream fos = null ;
+	    
+		for (Map<String, String> map : listF)
+			if (!txt.contains(map.get("jobName")))
+				txt += map.get("jobName") + "\r\n";
 
+		try {
+			fos = new FileOutputStream(destFile);
+			fos.write(txt.getBytes());
+			fos.flush();
+		} catch (Exception ex) {
+			System.out.println("== writeListFtoTXT Exception ==> " + ex.getMessage());
+		} finally {
+			try {
+				fos.close();
+			} catch (IOException e) {
+				System.out.println("== writeListFtoTXT Finally Exception ==> " + e.getMessage());
+			}
+		}
+	}
 }
