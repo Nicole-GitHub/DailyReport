@@ -154,6 +154,7 @@ public class Tools {
 			fos = new FileOutputStream(destFile,true); // 第二參數設定是否刪除原有內容(預設false會刪)
 			fos.write(str.getBytes());
 			fos.flush();
+			// 若要設定編碼則需透過OutputStreamWriter
 			pw = new PrintWriter(new OutputStreamWriter(fos, StandardCharsets.UTF_8));
 		} catch (Exception ex) {
 			System.out.println("== writeListFtoTXT Exception ==> " + ex.getMessage());
