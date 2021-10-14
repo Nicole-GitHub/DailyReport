@@ -22,8 +22,8 @@ public class DailyReportMain {
 			System.out.println("===os.name===" + os);
 			
 			// Debug
-//			path = os.contains("Mac") ? "/Users/nicole/22/ETL/DailyReport/" // Mac
-//					: "D:/DailyReport/"; // win
+			path = os.contains("Mac") ? "/Users/nicole/22/ETL/DailyReport/" // Mac
+					: "D:/DailyReport/"; // win
 			
 			System.out.println("path: " + path);
 			Map<String, String> mapProp = Property.getProperties(path);

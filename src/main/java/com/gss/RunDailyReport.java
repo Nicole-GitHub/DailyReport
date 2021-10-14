@@ -185,7 +185,7 @@ public class RunDailyReport {
 				hhInt = hhInt == 12 ? 0 : hhInt; // 0 ~ 11
 				hhInt = hhInt + (isPm ? 12 : 0); // 0 ~ 23
 				// mail收到的時間(24小時制)
-				jobRSTime = hhInt + time.substring(time.indexOf(":")); // 22:22
+				jobRSTime = Tools.getLen2(String.valueOf(hhInt)) + time.substring(time.indexOf(":")); // 22:22
 				// job 所屬日期 (日誌用)
 				jobRSDate = jobMailTitleArr[arrLen - 2].trim();
 				// job 原日期 (後面刪除相同job時使用)
@@ -235,8 +235,8 @@ public class RunDailyReport {
 					list.add(map);
 
 					System.out.println("======================== Start ========================");
-					System.out.println("jobRSDate 日誌日期 => " + jobRSDate);
-					System.out.println("jobRSTime job時間 => " + jobRSTime);
+//					System.out.println("jobRSDate 日誌日期 => " + jobRSDate);
+//					System.out.println("jobRSTime job時間 => " + jobRSTime);
 					System.out.println("jobRSDateTime 日誌日期時間 => " + jobRSDate + " " + jobRSTime);
 					System.out.println("jobRSOriDateTime job原日期時間 => " + jobRSOriDate + " " + jobRSTime);
 					System.out.println("jobPeriod job執行區間 => " + jobPeriod);
@@ -261,14 +261,8 @@ public class RunDailyReport {
 						&& chkMap.get("jobRSDate").equals(chkMap2.get("jobRSDate"))
 						&& Long.valueOf(chkMap.get("jobRSOriDateTime").replaceAll("[ :]", "")) < Long
 								.valueOf(chkMap2.get("jobRSOriDateTime").replaceAll("[ :]", ""))) {
-					System.out.println("=====list remove===== chkMap = " + chkMap.get("jobRSOriDateTime").replaceAll("[ :]", ""));
-					System.out.println("=====list remove===== chkMap2 = " + chkMap2.get("jobRSOriDateTime").replaceAll("[ :]", ""));
-					System.out.println("=====list remove===== Compare Result = "
-							+ (Long.valueOf(chkMap.get("jobRSOriDateTime").replaceAll("[ :]", "")) < Long
-									.valueOf(chkMap2.get("jobRSOriDateTime").replaceAll("[ :]", ""))));
-					System.out.println("=====list remove===== jobRSDate = " + chkMap.get("jobRSDate")
-							+ ", jobRSTime = " + chkMap.get("jobRSTime") + ", jobRSDateTime = "
-							+ chkMap.get("jobRSDateTime") + ", jobRSOriDateTime = " + chkMap.get("jobRSOriDateTime")
+					System.out.println("=====list remove===== "
+							+ "jobRSDateTime = " + chkMap.get("jobRSDateTime") + ", jobRSOriDateTime = " + chkMap.get("jobRSOriDateTime")
 							+ ", jobPeriod = " + chkMap.get("jobPeriod") + ", jobSeq = " + chkMap.get("jobSeq")
 							+ ", jobEName = " + chkMap.get("jobEName") + ", jobName = " + chkMap.get("jobName")
 							+ ", jobRunRS = " + chkMap.get("jobRunRS"));
