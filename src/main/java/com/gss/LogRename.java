@@ -47,7 +47,7 @@ public class LogRename {
 						
 						// 將失敗的RQ另外整理寫入jobF.txt
 						if(run_flag.contains("3"))
-							txt += map.get("qcLogFile") + "\t" + run_flag + "\t" + rqId + ".log \r\n";
+							txt += map.get("qcLogFile") + "\t" + run_flag + "\t" + rqId + " \r\n";
 						
 					}
 				}

@@ -5,13 +5,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -147,17 +147,20 @@ public class Tools {
 	protected static void writeListFtoFile(String path, String str) {
 	    String destFile = path + "/JobF.txt";
 	    FileOutputStream fos = null ;
+	    PrintWriter pw = null;
 		str = "\r\n\r\n ====== " + getToDay() + " ====== \r\n\r\n" + str;
 
 	    try {
-			fos = new FileOutputStream(destFile,true); // 不刪除原有內容
+			fos = new FileOutputStream(destFile,true); // 第二參數設定是否刪除原有內容(預設false會刪)
 			fos.write(str.getBytes());
 			fos.flush();
+			pw = new PrintWriter(new OutputStreamWriter(fos, StandardCharsets.UTF_8));
 		} catch (Exception ex) {
 			System.out.println("== writeListFtoTXT Exception ==> " + ex.getMessage());
 		} finally {
 			try {
 				fos.close();
+				pw.close();
 			} catch (IOException e) {
 				System.out.println("== writeListFtoTXT Finally Exception ==> " + e.getMessage());
 			}
