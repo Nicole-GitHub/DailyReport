@@ -261,7 +261,12 @@ public class RunDailyReport {
 						&& chkMap.get("jobRSDate").equals(chkMap2.get("jobRSDate"))
 						&& Long.valueOf(chkMap.get("jobRSOriDateTime").replaceAll("[ :]", "")) < Long
 								.valueOf(chkMap2.get("jobRSOriDateTime").replaceAll("[ :]", ""))) {
-					System.out.println("=====list remove=====" + ", jobRSDate = " + chkMap.get("jobRSDate")
+					System.out.println("=====list remove===== chkMap = " + chkMap.get("jobRSOriDateTime").replaceAll("[ :]", ""));
+					System.out.println("=====list remove===== chkMap2 = " + chkMap2.get("jobRSOriDateTime").replaceAll("[ :]", ""));
+					System.out.println("=====list remove===== Compare Result = "
+							+ (Long.valueOf(chkMap.get("jobRSOriDateTime").replaceAll("[ :]", "")) < Long
+									.valueOf(chkMap2.get("jobRSOriDateTime").replaceAll("[ :]", ""))));
+					System.out.println("=====list remove===== jobRSDate = " + chkMap.get("jobRSDate")
 							+ ", jobRSTime = " + chkMap.get("jobRSTime") + ", jobRSDateTime = "
 							+ chkMap.get("jobRSDateTime") + ", jobRSOriDateTime = " + chkMap.get("jobRSOriDateTime")
 							+ ", jobPeriod = " + chkMap.get("jobPeriod") + ", jobSeq = " + chkMap.get("jobSeq")
