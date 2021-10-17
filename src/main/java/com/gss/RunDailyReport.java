@@ -305,9 +305,8 @@ public class RunDailyReport {
 								|| map.get("jobRunRS").equals("F"))) {
 							
 							// 寫入Sheet1的狀態
-							if (map.get("jobRunRS").equals("S")
-									|| (map.get("jobRunRS").equals("F")
-											&& "V".equals(targetRow.getCell(dateCell).getStringCellValue())))
+							if ((map.get("jobRunRS").equals("S") || map.get("jobRunRS").equals("F"))
+									&& "V".equals(targetRow.getCell(dateCell).getStringCellValue()))
 								targetCell.setCellValue(map.get("jobRunRS"));
 
 							// 將應檢查的失敗Job寫入JobF.txt
