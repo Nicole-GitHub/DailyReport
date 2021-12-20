@@ -55,8 +55,8 @@ public class LogRename {
 				System.out.println(filePath + "logRename Done");
 			}
 
-			// 將失敗的RQ資料寫入file中
-			Tools.writeListFtoFile(path, txt);
+			// 將失敗的RQ資料寫入file中，並做結尾
+			Tools.writeListFtoFile(path, "失敗的RQ \r\n\r\n" + txt, true);
 			
 			System.out.println("All logRename Done");
 		} catch (Exception ex) {

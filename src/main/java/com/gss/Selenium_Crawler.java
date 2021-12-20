@@ -15,6 +15,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import us.codecraft.webmagic.selector.Html;
@@ -78,7 +79,15 @@ public class Selenium_Crawler {
 					if (em.getText().contains(str)) {
 						System.out.println(em.getText());
 						download = str.contains("失敗");
-						em.click();
+						/**
+						 * 因使用原em.click();
+						 * 常造成點擊第二個信箱項目時失敗
+						 * 失敗原因可能為driver版本與實際chrome版本不合
+						 * (即使是透過舊版chrome driver開啟也一樣會被自動更新為新版)
+						 * 故改用Actions取代
+						 */
+//						em.click();
+						new Actions(driver).moveToElement(em).click().perform();
 						break;
 					}
 				}

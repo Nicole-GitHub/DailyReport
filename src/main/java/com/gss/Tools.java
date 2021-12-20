@@ -144,15 +144,39 @@ public class Tools {
 	 * 
 	 * @param path
 	 */
-	protected static void writeListFtoFile(String path, String str) {
+	protected static void writeListFtoFile(String path, String str, boolean end) {
 	    String destFile = path + "/JobF.txt";
 	    FileOutputStream fos = null ;
+	    FileInputStream fis = null ;
 	    PrintWriter pw = null;
-		str = "\r\n\r\n ====== " + getToDay() + " ====== \r\n\r\n" + str;
+        byte[] buffer=new byte[10240];
+	    int s;
+		str = "\r\n\r\n ====== " + getToDay() + " " + str;
 
 	    try {
-			fos = new FileOutputStream(destFile,true); // 第二參數設定是否刪除原有內容(預設false會刪)
+	    	File f = new File(destFile);
+	    	
+	    	/**
+	    	 * createNewFile
+	    	 * true: 表示檔案不存在，並會自動產生檔案
+	    	 * false: 表示檔案已存在
+	    	 */
+	    	if(f.createNewFile())
+	    		System.out.println("已自動產生檔案");
+	    	
+	    	// 將原檔案內容讀出後與整併進要寫入的內容中(原內容放最後)
+	    	fis = new FileInputStream(f);
+	    	while((s = fis.read(buffer)) != -1) {
+	    		str += new String(buffer,0,s);
+	    	}
+	    	
+			if(end)
+				str += "\r\n\r\n --------------------- END ----------------------- \r\n\r\n";
+			
+	    	// 將整理好的內容寫入檔案內
+	    	fos = new FileOutputStream(f); // 第二參數設定是保留原有內容(預設false會刪)
 			fos.write(str.getBytes());
+			
 			fos.flush();
 			// 若要設定編碼則需透過OutputStreamWriter
 			pw = new PrintWriter(new OutputStreamWriter(fos, StandardCharsets.UTF_8));
@@ -161,6 +185,7 @@ public class Tools {
 		} finally {
 			try {
 				fos.close();
+				fis.close();
 				pw.close();
 			} catch (IOException e) {
 				System.out.println("== writeListFtoTXT Finally Exception ==> " + e.getMessage());

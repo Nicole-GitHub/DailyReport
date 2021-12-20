@@ -106,7 +106,7 @@ public class RunDailyReport {
 		for (Map<String, String> map : listF)
 			if (!txt.contains(map.get("jobName")))
 				txt += map.get("jobName") + "\r\n";
-		Tools.writeListFtoFile(path, txt);
+		Tools.writeListFtoFile(path, "填寫日誌清單用 \r\n\r\n" + txt, false);
 	}
 
 	/**
