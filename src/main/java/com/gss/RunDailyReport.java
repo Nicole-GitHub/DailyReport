@@ -478,33 +478,4 @@ public class RunDailyReport {
 		}
 		return true;
 	}
-	
-	/**
-	 * 將失敗的job寫入file中 (填寫日誌清單_2021)
-	 * 
-	 * @param path
-	 */
-	private static void writeListFtoFile(String path) {
-		String txt = "";
-	    String destFile = path + "/jobF.txt";
-	    FileOutputStream fos = null ;
-	    
-		for (Map<String, String> map : listF)
-			if (!txt.contains(map.get("jobName")))
-				txt += map.get("jobName") + "\r\n";
-
-		try {
-			fos = new FileOutputStream(destFile);
-			fos.write(txt.getBytes());
-			fos.flush();
-		} catch (Exception ex) {
-			System.out.println("== writeListFtoTXT Exception ==> " + ex.getMessage());
-		} finally {
-			try {
-				fos.close();
-			} catch (IOException e) {
-				System.out.println("== writeListFtoTXT Finally Exception ==> " + e.getMessage());
-			}
-		}
-	}
 }

@@ -152,7 +152,9 @@ public class Tools {
         byte[] buffer=new byte[10240];
 	    int s;
 		str = "\r\n\r\n ====== " + getToDay() + " " + str;
-
+		if(end)
+			str += "\r\n\r\n --------------------- END ----------------------- \r\n\r\n";
+		
 	    try {
 	    	File f = new File(destFile);
 	    	
@@ -169,9 +171,6 @@ public class Tools {
 	    	while((s = fis.read(buffer)) != -1) {
 	    		str += new String(buffer,0,s);
 	    	}
-	    	
-			if(end)
-				str += "\r\n\r\n --------------------- END ----------------------- \r\n\r\n";
 			
 	    	// 將整理好的內容寫入檔案內
 	    	fos = new FileOutputStream(f); // 第二參數設定是保留原有內容(預設false會刪)
