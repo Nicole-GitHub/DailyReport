@@ -24,11 +24,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 public class RunDailyReport {
 	static final String mailStartText = " - 您好, 〔("; // job 寄的 mail 開頭
 	static final SimpleDateFormat sdfYYYYMMDD = new SimpleDateFormat("yyyyMMdd");
-	static Integer dateCell = 0, dataRow = 0, chkDate = 0;
-	static String JobMonth = "", JobDate = "", excelMonth = "", DailyReportExcel = "", account = "", pwd = "";
+	static Integer dateCell = 0, dataRow = 0, chkDate = 0, runtimeInt = 0;
+	static String JobMonth = "", JobDate = "", excelMonth = "", DailyReportExcel = "", account = "", pwd = "",
+			runtime = "";
 	static boolean isPrint;
 	static Row targetRow;
-	static Cell targetCell, previouCell, targetChkCell, previouChkCell;
+	static Cell targetCell, previouCell, targetChkCell, previouChkCell, runtimeCell;
 	static ArrayList<Map<String, String>> listF, list, listFforSheet3;
 	static String[] inboxName;
 
@@ -47,19 +48,22 @@ public class RunDailyReport {
 
 		// 日報放置路徑與檔名
 		DailyReportExcel = path + mapProp.get("DailyReportExcel"); // Jar
-		System.out.println("日報Excel: " + DailyReportExcel);
+		System.out.println("日誌Excel: " + DailyReportExcel);
 
 		// 收件匣名稱
 		inboxName = mapProp.get("inboxName").split(",");
-		System.out.println("收件匣名稱: " + inboxName);
+		String inboxNameStr = "";
+		for (String str : inboxName)
+			inboxNameStr += inboxNameStr.length() > 0 ? ", " + str : str;
+		System.out.println("收件匣名稱: " + inboxNameStr);
 
 		// 帳號
 		account = mapProp.get("account");
-		System.out.println("Mail帳號: " + account);
+//		System.out.println("Mail帳號: " + account);
 
 		// 密碼
 		pwd = mapProp.get("pwd");
-		System.out.println("Mail密碼: " + pwd);
+//		System.out.println("Mail密碼: " + pwd);
 
 		Workbook workbook = null;
 		OutputStream output = null;
@@ -73,7 +77,7 @@ public class RunDailyReport {
 			Sheet sheet1 = workbook.getSheetAt(0);
 
 			// 日誌的月份 年月(六碼)
-			excelMonth = sheet1.getRow(0).getCell(0).getStringCellValue();
+			excelMonth = sheet1.getRow(0).getCell(0).getStringCellValue().trim();
 			excelMonth = excelMonth.substring(0, 7).trim();
 
 			// 寫入 "JobList" 頁籤的狀態，並整理出失敗的Job
@@ -294,37 +298,46 @@ public class RunDailyReport {
 				// 取得對應Job的Row位置(橫列)
 				for (Row row : sheet1) {
 					if (Tools.isntBlank(row.getCell(0))
-							&& row.getCell(0).getStringCellValue().substring(1).equals(map.get("jobEName"))) {
+						&& row.getCell(0).getStringCellValue().replaceAll("\u00A0", "").equals(map.get("jobEName"))
+					) {
 						dataRow = row.getRowNum();
 
 						// 將執行結果設定至對應位置
 						// 因第一行的日欄位有合併儲存格 實際取到的位置為"應檢查"列而非我們要設定的"執行結果"列 故取得的dateCell需+1
 						targetRow = sheet1.getRow(dataRow);
 						targetCell = targetRow.getCell(dateCell + 1);
-						if (dataRow > 0 && (targetCell.getCellType() == Cell.CELL_TYPE_BLANK
-								|| map.get("jobRunRS").equals("F"))) {
-							
-							// 寫入Sheet1的狀態
-							if ((map.get("jobRunRS").equals("S") || map.get("jobRunRS").equals("F"))
-									&& "V".equals(targetRow.getCell(dateCell).getStringCellValue()))
+						// 應檢查
+						if ("V".equals(targetRow.getCell(dateCell).getStringCellValue())) {
+							/**
+							 * 成功的job
+							 * 寫入Sheet1的狀態(當targetCell不為F時則壓S)
+							 */
+							if (map.get("jobRunRS").equals("S")
+									&& (targetCell.getCellType() == Cell.CELL_TYPE_BLANK
+											|| (targetCell.getCellType() == Cell.CELL_TYPE_STRING
+													&& !"F".equals(targetCell.getStringCellValue()))))
 								targetCell.setCellValue(map.get("jobRunRS"));
 
-							// 將應檢查的失敗Job寫入JobF.txt
-							if (map.get("jobRunRS").equals("F")
-									&& "V".equals(targetRow.getCell(dateCell).getStringCellValue()))
+							/**
+							 * 失敗的job
+							 * 寫入Sheet1的狀態
+							 * 寫入JobF.txt
+							 */
+							if ("F".equals(map.get("jobRunRS"))) {
+								targetCell.setCellValue(map.get("jobRunRS"));
 								listF.add(map);
-
-							// 將失敗的Job放入job待辦頁籤中 (不論是否應檢查)
-							if ("F".equals(map.get("jobRunRS")))
-								listFforSheet3.add(map);
-							
-							System.out.println("changeCellValue====> dataRow=" + dataRow + ", dateCell=" + dateCell
-									+ ", Value=" + map.get("jobRunRS") + ", jobRSDateTime=" + map.get("jobRSDateTime")
-									+ ", jobPeriod=" + map.get("jobPeriod"));
-							
-							for (Entry<String, String> ent : map.entrySet()) {
-								System.out.println(ent.getKey() + " : " + ent.getValue() + " , ");
 							}
+						}
+						// 將失敗的Job放入job待辦頁籤中 (不論是否應檢查)
+						if ("F".equals(map.get("jobRunRS")))
+							listFforSheet3.add(map);
+
+						System.out.println("changeCellValue====> dataRow=" + dataRow + ", dateCell=" + dateCell
+								+ ", Value=" + map.get("jobRunRS") + ", jobRSDateTime=" + map.get("jobRSDateTime")
+								+ ", jobPeriod=" + map.get("jobPeriod"));
+
+						for (Entry<String, String> ent : map.entrySet()) {
+							System.out.println(ent.getKey() + " : " + ent.getValue() + " , ");
 						}
 					}
 				}
@@ -358,10 +371,11 @@ public class RunDailyReport {
 
 				// 取得對應Job的Row位置(橫列)
 				for (Row row : sheet1) {
-					previouChkCell = row.getCell(dateCell - 2);
-					previouCell = row.getCell(dateCell - 1);
-					targetChkCell = row.getCell(dateCell);
-					targetCell = row.getCell(dateCell + 1);
+					previouChkCell = row.getCell(dateCell - 2); //前一天的"應檢查"
+					previouCell = row.getCell(dateCell - 1); //前一天的"執行結果"
+					targetChkCell = row.getCell(dateCell); //今天的"應檢查"
+					targetCell = row.getCell(dateCell + 1); //今天的"執行結果"
+					runtimeCell = row.getCell(6); //執行時間
 
 					/**
 					 * X: 前一天狀態為X && 今天應檢查 && 今天尚未壓狀態
@@ -378,18 +392,22 @@ public class RunDailyReport {
 					}
 
 					/**
-					 * Z: 前一天不應檢查 && 今天應檢查 && 今天尚未壓狀態
+					 * Z: 前一天不應檢查 && 今天應檢查 && 今天尚未壓狀態 && 執行時間 >= 09:00
 					 * 含月初的判斷
 					 */
 					if (previouChkCell != null && row.getRowNum() > 1
 							&& (previouChkCell.getCellType() == Cell.CELL_TYPE_BLANK
-							|| (previouChkCell.getCellType() == Cell.CELL_TYPE_STRING
-							&& !previouChkCell.getStringCellValue().equalsIgnoreCase("V")))
+									|| (previouChkCell.getCellType() == Cell.CELL_TYPE_STRING
+											&& !previouChkCell.getStringCellValue().equalsIgnoreCase("V")))
 							&& targetChkCell.getCellType() == Cell.CELL_TYPE_STRING
 							&& targetChkCell.getStringCellValue().equalsIgnoreCase("V")
 							&& targetCell.getCellType() == Cell.CELL_TYPE_BLANK) {
-						System.out.println("Change Value Z : Row=" + row.getRowNum() + ", Cell=" + dateCell);
-						targetCell.setCellValue("Z");
+						runtime = runtimeCell.getStringCellValue().replaceAll("\u00A0", "");
+						runtimeInt = Integer.parseInt(runtime.substring(0, runtime.indexOf(":")));
+						if (runtimeInt >= 9) {
+							System.out.println("Change Value Z : Row=" + row.getRowNum() + ", Cell=" + dateCell + ", runtime=" + runtime);
+							targetCell.setCellValue("Z");
+						}
 					}
 					
 					// 需再執行一次有公式的欄位才會更新欄位值

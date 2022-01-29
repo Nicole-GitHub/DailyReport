@@ -43,9 +43,10 @@ public class Selenium_Crawler {
 		String[] jobMailTitleArr;
 		int arrLen = 0;
 
+		String os = System.getProperty("os.name");
 		Map<String, String> mapProp = Property.getProperties(path);
 		Integer chkDate = Integer.valueOf(mapProp.get("chkDate"));
-		String chromeDefaultDownloadPath = "mac".equalsIgnoreCase(mapProp.get("os"))
+		String chromeDefaultDownloadPath = os.contains("Mac")
 				? mapProp.get("chromeDefaultDownloadPathMac")
 				: mapProp.get("chromeDefaultDownloadPathWindows");
 
@@ -53,7 +54,7 @@ public class Selenium_Crawler {
 		DesiredCapabilities capabilities = DesiredCapabilities.chrome();
 		capabilities.setCapability("chrome.switches", Arrays.asList("--start-maximized"));
 		System.setProperty("webdriver.chrome.driver",
-				path + mapProp.get("chromedriver") + (mapProp.get("os").equals("mac") ? "" : ".exe"));
+				path + mapProp.get("chromedriver") + (os.contains("Mac") ? "" : ".exe"));
 		driver = new ChromeDriver(capabilities);
 		driver.get(mapProp.get("webAddress"));
 		System.out.println("##start login ");
