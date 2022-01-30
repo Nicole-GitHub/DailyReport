@@ -46,7 +46,8 @@ public class Selenium_Crawler {
 
 		String os = System.getProperty("os.name");
 		Map<String, String> mapProp = Property.getProperties(path);
-		Integer chkDate = Integer.valueOf(mapProp.get("chkDate"));
+		Integer chkDate = Integer.valueOf(Tools.getCalendar2String(cal, "yyyyMMdd"));
+System.out.println("chkDate="+chkDate);
 		String chromeDefaultDownloadPath = os.contains("Mac")
 				? mapProp.get("chromeDefaultDownloadPathMac")
 				: mapProp.get("chromeDefaultDownloadPathWindows");
@@ -224,42 +225,57 @@ public class Selenium_Crawler {
 				SimpleDateFormat sdfyyMd = new SimpleDateFormat("yy/M/d");
 				element = driver.findElement(By.id("zl__TV-main__rows"));
 				html = new Html(element.getAttribute("outerHTML"));
-				// 滑動頁面直到信件時間出現欲檢查日期的前一天出現為止
 				String scroll = "go";
-				int chkMailDateLen = 5;
+				/**
+				 * 因不一定每天都有失敗job
+				 * 故設定滑動頁面"最多"滑到信件時間出現欲檢查日期的前10天出現為止
+				 */
+				int chkMailDateLen = 10;
+				
 				String[] calArr = new String[chkMailDateLen];
 				for (int i = 0; i < chkMailDateLen; i++) {
 					calArr[i] = sdfyyMd.format(cal.getTime());
 					cal.add(Calendar.DATE, -1);
 				}
-				cal.add(Calendar.DATE, +5);
-				while ("go".equals(scroll)
-					&& StringUtil.isBlank(html.xpath("//li[contains(@aria-label,', " + calArr[0] + "')]").get())
-					&& StringUtil.isBlank(html.xpath("//li[contains(@aria-label,', " + calArr[1] + "')]").get())
-					&& StringUtil.isBlank(html.xpath("//li[contains(@aria-label,', " + calArr[2] + "')]").get())
-					&& StringUtil.isBlank(html.xpath("//li[contains(@aria-label,', " + calArr[3] + "')]").get())
-					&& StringUtil.isBlank(html.xpath("//li[contains(@aria-label,', " + calArr[4] + "')]").get())
-					) {
 
-					if ("go".equals(scroll)) {
-						html = new Html(element.getAttribute("outerHTML"));
-						// 執行頁面滾動的JS語法
-						String height1 = ((JavascriptExecutor) driver)
-								.executeScript("var element = document.getElementById('zl__TV-main__rows');"
-										+ "var height1 = element.scrollHeight;"
-										+ "element.scroll(0,height1);"
-										+ "return height1;")
-								.toString();
-						Thread.sleep(1000);
-						String height2 = ((JavascriptExecutor) driver)
-								.executeScript("var element = document.getElementById('zl__TV-main__rows');"
-										+ "var height2 = element.scrollHeight;"
-										+ "return height2;")
-								.toString();
-						scroll = Integer.parseInt(height1) == Integer.parseInt(height2) ? "stop" : "go";
-						// 给页面预留加载时间
-						Thread.sleep(1000);
+				// 因爬不只一個收件匣，故需將cal日期加回去
+				cal.add(Calendar.DATE, chkMailDateLen);
+				boolean dateisBlank = true;
+				
+				while ("go".equals(scroll)) {
+					// 最少要滾到檢查日期的前兩天
+					for (int calArrLen = 2; calArrLen < chkMailDateLen; calArrLen++) {
+						dateisBlank = StringUtil
+								.isBlank(html.xpath("//li[contains(@aria-label,', " + calArr[calArrLen] + "')]").get());
+						// 若已滾到檢查日期的前兩天前則可停止
+						if (!dateisBlank)
+							break;
 					}
+					if (!dateisBlank)
+						break;
+
+					html = new Html(element.getAttribute("outerHTML"));
+					// 執行頁面滾動的JS語法
+					String height1 = ((JavascriptExecutor) driver)
+							.executeScript("var element = document.getElementById('zl__TV-main__rows');"
+									+ "var height1 = element.scrollHeight;"
+									+ "element.scroll(0,height1);"
+									+ "return height1;")
+							.toString();
+					Thread.sleep(1000);
+					String height2 = ((JavascriptExecutor) driver)
+							.executeScript("var element = document.getElementById('zl__TV-main__rows');"
+									+ "var height2 = element.scrollHeight;"
+									+ "return height2;")
+							.toString();
+					/**
+					 * height1: 未滾前的高度
+					 * height2: 滾動後的高度
+					 * 若兩個高度皆相同則表示已滾到底
+					 */
+					scroll = Integer.parseInt(height1) == Integer.parseInt(height2) ? "stop" : "go";
+					// 给页面预留加载时间
+					Thread.sleep(1000);
 				}
 				System.out.println("加載中...");
 				return true;

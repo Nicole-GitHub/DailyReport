@@ -24,7 +24,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 public class RunDailyReport {
 	static final String mailStartText = " - 您好, 〔("; // job 寄的 mail 開頭
-	static final SimpleDateFormat sdfYYYYMMDD = new SimpleDateFormat("yyyyMMdd");
 	static Integer dateCell = 0, dataRow = 0, chkDate = 0, runtimeInt = 0;
 	static String JobMonth = "", JobDate = "", excelMonth = "", DailyReportExcel = "", account = "", pwd = "",
 			runtime = "";
@@ -44,8 +43,9 @@ public class RunDailyReport {
 	protected static void runDailyReport(String path) {
 
 		Map<String, String> mapProp = Property.getProperties(path);
+		
 		// 要從哪天的mail開始取
-		chkDate = Integer.parseInt(mapProp.get("chkDate"));
+		chkDate = "auto".equals(mapProp.get("chkDate")) ? Tools.getChkDate() : Integer.parseInt(mapProp.get("chkDate"));
 		System.out.println("要從 " + chkDate + " 的mail開始取 ");
 
 		// 日報放置路徑與檔名
@@ -142,18 +142,19 @@ public class RunDailyReport {
 		List<Map<String, String>> listMail;
 		listFforSheet3 = new ArrayList<TreeMap<String, String>>();
 		
-		// 取 昨、今、明 三天的日期
+		/**
+		 *  取 昨、今 兩天的日期
+		 *  因mail中的日期會寫"昨天"、"今天"而非日期
+		 */
 		Calendar cal = Calendar.getInstance();
-		String today = sdfYYYYMMDD.format(cal.getTime());
+		String today = Tools.getCalendar2String(cal, "yyyyMMdd");
 		cal.add(Calendar.DATE, -1);
-		String yesterday = sdfYYYYMMDD.format(cal.getTime());
+		String yesterday = Tools.getCalendar2String(cal, "yyyyMMdd");
 
 		// listMail
-		cal.setTime(sdfYYYYMMDD.parse(String.valueOf(chkDate)));
-		cal.add(Calendar.DATE, -2);
+		cal.setTime(Tools.getString2Date(String.valueOf(chkDate), "yyyyMMdd"));
 		listMail = Selenium_Crawler.getMailContent(path, inboxName, account, pwd, cal, listFforSheet3);
 
-		SimpleDateFormat sdfYYYYMMDDHHmm = new SimpleDateFormat("yyyyMMdd HH:mm");
 		for (Map<String, String> mailMap : listMail) {
 
 			System.out.println(mailMap.get("title"));
@@ -197,15 +198,14 @@ public class RunDailyReport {
 				jobRSDate = jobMailTitleArr[arrLen - 2].trim();
 				// job 原日期 (後面刪除相同job時使用)
 				jobRSOriDate = jobRSDate.equals("昨天") ? yesterday
-						: jobRSDate.equals("今天") ? today 
-								: new SimpleDateFormat("yyyyMMdd").format(
-										new SimpleDateFormat("yy/M/d").parse(
-												jobRSDate.substring(0, jobRSDate.length() - 1)));
+						: jobRSDate.equals("今天") ? today
+								: Tools.getDate2String(
+										Tools.getString2Date(jobRSDate.substring(0, jobRSDate.length() - 1), "yy/M/d"),
+										"yyyyMMdd");
 				System.out.println("=== jobRSDate : " + jobRSDate + " , jobRSOriDate : " + jobRSOriDate
 						+ " , jobRSTime : " + jobRSTime);
-				
-				cal.setTime(sdfYYYYMMDDHHmm.parse(jobRSOriDate + " " + jobRSTime));
-				System.out.println("===== jobRSOriDate sdfYYYYMMDDHHmm ====> " + sdfYYYYMMDDHHmm.format(cal.getTime()));
+				cal.setTime(Tools.getString2Date(jobRSOriDate + " " + jobRSTime, "yyyyMMdd HH:mm"));
+				System.out.println("===== jobRSOriDate YYYYMMDDHHmm ====> " + Tools.getCalendar2String(cal, "yyyyMMdd HH:mm"));
 				
 				// job 執行區間
 				jobPeriod = jobMailTitleArr[arrLen - 5]; // 因job中文名稱內可能會有多個逗號，故抓倒數第五位陣列值
@@ -213,7 +213,7 @@ public class RunDailyReport {
 				if (hhInt > 8)
 					cal.add(Calendar.DATE, 1);
 				// job 所屬日期 (日誌用)
-				jobRSDate = sdfYYYYMMDD.format(cal.getTime());
+				jobRSDate = Tools.getCalendar2String(cal, "yyyyMMdd");
 
 				// 是否為這次要整理的job日期範圍
 				isPrint = Integer.parseInt(jobRSDate) >= chkDate;

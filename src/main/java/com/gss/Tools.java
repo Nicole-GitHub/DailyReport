@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -115,11 +116,76 @@ public class Tools {
 	 * @param delimiter
 	 * @return
 	 */
-	protected static String getToDay () {
+	protected static String getToDay (String format) {
 		Calendar cal = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		return getCalendar2String(cal,format);
+	}
+	
+	/**
+	 * 日期(Calendar)轉字串
+	 * 
+	 * @param cal
+	 * @param format
+	 * @return
+	 */
+	protected static String getCalendar2String(Calendar cal, String format) {
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
 		return sdf.format(cal.getTime());
-		
+	}
+	
+	/**
+	 * 日期(Date)轉字串
+	 * 
+	 * @param date
+	 * @param format
+	 * @return
+	 */
+	protected static String getDate2String(Date date, String format) {
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		cal.setTime(date);
+		return sdf.format(cal.getTime());
+	}
+	
+	/**
+	 * 字串轉日期
+	 * 
+	 * @param cal
+	 * @param format
+	 * @return
+	 * @throws ParseException 
+	 */
+	protected static Date getString2Date(String dateStr, String format) throws ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		return sdf.parse(dateStr);
+	}
+	
+	/**
+	 * 今日為一週內的第幾天
+	 *  1:星期日， 7:星期六
+	 *  
+	 * @param delimiter
+	 * @return
+	 */
+	private static int getDayofWeek() {
+		Calendar cal = Calendar.getInstance();
+		return cal.get(Calendar.DAY_OF_WEEK);
+	}
+	
+	/**
+	 * 自動取得檢查日
+	 * @return
+	 */
+	protected static int getChkDate() {
+		Calendar cal = Calendar.getInstance();
+		int dayofWeek = getDayofWeek();
+		if(dayofWeek == 1) { // 週日
+			cal.add(cal.DATE, -1);
+		}else if(dayofWeek == 2) { // 週一
+			cal.add(cal.DATE, -2);
+		}
+		int chkDate = Integer.parseInt(getCalendar2String(cal,"yyyyMMdd"));
+		return chkDate;
 	}
 
 	/**
@@ -151,7 +217,7 @@ public class Tools {
 	    PrintWriter pw = null;
         byte[] buffer=new byte[10240];
 	    int s;
-		str = "\r\n\r\n ====== " + getToDay() + " " + str;
+		str = "\r\n\r\n ====== " + getToDay("yyyy/MM/dd HH:mm:ss") + " " + str;
 		if(end)
 			str += "\r\n\r\n --------------------- END ----------------------- \r\n\r\n";
 		
