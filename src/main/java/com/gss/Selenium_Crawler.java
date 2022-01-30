@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.jsoup.helper.StringUtil;
 import org.openqa.selenium.By;
@@ -29,7 +30,7 @@ public class Selenium_Crawler {
 
 	protected static List<Map<String, String>> getMailContent(
 			String path, String[] inboxName, String account,
-			String pwd, Calendar cal) {
+			String pwd, Calendar cal, ArrayList<TreeMap<String, String>> listFforSheet3) {
 		
 		driver = null;
 		List<WebElement> listElement;
@@ -172,7 +173,7 @@ public class Selenium_Crawler {
 					 * 整理出失敗的job資訊寫入jobF.txt
 					 */
 					if(download)
-						LogRename.logRename(path, qcLogList, chromeDefaultDownloadPath);
+						LogRename.logRename(path, qcLogList, chromeDefaultDownloadPath, listFforSheet3);
 				}
 			}
 

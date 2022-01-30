@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -30,7 +31,8 @@ public class RunDailyReport {
 	static boolean isPrint;
 	static Row targetRow;
 	static Cell targetCell, previouCell, targetChkCell, previouChkCell, runtimeCell;
-	static ArrayList<Map<String, String>> listF, list, listFforSheet3;
+	static ArrayList<Map<String, String>> listF, list;
+	static ArrayList<TreeMap<String, String>> listFforSheet3;
 	static String[] inboxName;
 
 	/**
@@ -138,7 +140,8 @@ public class RunDailyReport {
 		Map<String, String> map;
 		list = new ArrayList<Map<String, String>>();
 		List<Map<String, String>> listMail;
-
+		listFforSheet3 = new ArrayList<TreeMap<String, String>>();
+		
 		// 取 昨、今、明 三天的日期
 		Calendar cal = Calendar.getInstance();
 		String today = sdfYYYYMMDD.format(cal.getTime());
@@ -148,7 +151,7 @@ public class RunDailyReport {
 		// listMail
 		cal.setTime(sdfYYYYMMDD.parse(String.valueOf(chkDate)));
 		cal.add(Calendar.DATE, -2);
-		listMail = Selenium_Crawler.getMailContent(path, inboxName, account, pwd, cal);
+		listMail = Selenium_Crawler.getMailContent(path, inboxName, account, pwd, cal, listFforSheet3);
 
 		SimpleDateFormat sdfYYYYMMDDHHmm = new SimpleDateFormat("yyyyMMdd HH:mm");
 		for (Map<String, String> mailMap : listMail) {
@@ -283,7 +286,6 @@ public class RunDailyReport {
 	 * @throws Exception
 	 */
 	private static void writeSheet1(Sheet sheet1) throws Exception {
-		listFforSheet3 = new ArrayList<Map<String, String>>();
 		listF = new ArrayList<Map<String, String>>();
 		for (Map<String, String> map : list) {
 			JobMonth = map.get("jobRSDate").substring(0, 6);
@@ -329,8 +331,17 @@ public class RunDailyReport {
 							}
 						}
 						// 將失敗的Job放入job待辦頁籤中 (不論是否應檢查)
-						if ("F".equals(map.get("jobRunRS")))
-							listFforSheet3.add(map);
+						if ("F".equals(map.get("jobRunRS"))) {
+							for(TreeMap<String,String> mapRQ : listFforSheet3) {
+								if(mapRQ.get("RQ_job_seq").equals(map.get("jobSeq"))){
+									mapRQ.putAll(map);
+									System.out.println("==== map putAll to mapRQ ===="); 
+									for (Entry<String, String> ent : mapRQ.entrySet()) {
+										System.out.println(ent.getKey() + " : " + ent.getValue() + " , ");
+									}
+								}
+							}
+						}
 
 						System.out.println("changeCellValue====> dataRow=" + dataRow + ", dateCell=" + dateCell
 								+ ", Value=" + map.get("jobRunRS") + ", jobRSDateTime=" + map.get("jobRSDateTime")
@@ -436,7 +447,7 @@ public class RunDailyReport {
 		lastRowNum = sheet3.getLastRowNum();
 
 		// 為了讓list能由後往前讀，故使用ListIterator
-		ListIterator<Map<String, String>> listIterator = listFforSheet3.listIterator();
+		ListIterator<TreeMap<String, String>> listIterator = listFforSheet3.listIterator();
 		// 先讓迭代器的指標移到最尾筆
 		while (listIterator.hasNext()) {
 			System.out.println("待辦 job : " + listIterator.next());
@@ -444,6 +455,10 @@ public class RunDailyReport {
 		// 再由後往前讀出來
 		while (listIterator.hasPrevious()) {
 			map = listIterator.previous();
+			// 若出現不在當月日誌清單內的失敗job則跳過
+			if(map.get("jobRSDate") == null) {
+				continue;
+			}
 			JobMonth = map.get("jobRSDate").substring(0, 6);
 			isPrint = true;
 			// 判斷是否為當月的日誌
@@ -471,7 +486,8 @@ public class RunDailyReport {
 					// 設定第六欄
 					Tools.setCellStyle(setColNum++, cell, cellStyle, row, sheet3, sheet4, "");
 					// 設定第七欄
-					Tools.setCellStyle(setColNum++, cell, cellStyle, row, sheet3, sheet4, "問題待查");
+					Tools.setCellStyle(setColNum++, cell, cellStyle, row, sheet3, sheet4,
+							map.get("RQ_rq_id") + " => " + map.get("RQ_run_flag"));
 					// 設定第八欄
 					Tools.setCellStyle(setColNum++, cell, cellStyle, row, sheet3, sheet4, "");
 				}

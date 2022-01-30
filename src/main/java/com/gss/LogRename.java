@@ -3,8 +3,11 @@ package com.gss;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -13,18 +16,21 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 public class LogRename {
 
-	public static void logRename(String path, List<Map<String, String>> qcLogList, String downloadsPath) {
+	public static void logRename(String path, List<Map<String, String>> qcLogList, String downloadsPath,
+			ArrayList<TreeMap<String, String>> listFforSheet3) {
 		File f;
 		FileOutputStream fos = null;
 		Workbook workbook = null;
+		TreeMap<String,String> mapRQ;
 		Sheet sheet;
-		String run_flag = "", rq_id = "", excelPath = "", filePath = "", txt = "",
+		String run_flag = "", rq_id = "", qcLogFile = "", excelPath = "", filePath = "", txt = "",
 				control_id = "", source_tablenm = "", target_tablenm = "", exec_sdate = "", exec_edate = "";
 
 		try {
 			
 			for (Map<String, String> map : qcLogList) {
-				filePath = downloadsPath + map.get("qcLogFile") + "/";
+				qcLogFile = map.get("qcLogFile");
+				filePath = downloadsPath + qcLogFile + "/";
 				excelPath = filePath + map.get("qcLogExcel");
 
 				f = new File(excelPath);
@@ -51,11 +57,23 @@ public class LogRename {
 							f.renameTo(new File(filePath + run_flag + "_" + rq_id + ".log"));
 
 						// 將失敗的RQ另外整理寫入jobF.txt
-						if (run_flag.contains("3"))
-							txt += "JOB:\t" + map.get("qcLogFile") + " \r\n"
+						if (run_flag.contains("3")) {
+							mapRQ = new TreeMap<String,String>();
+							mapRQ.put("RQ_control_id", control_id);
+							mapRQ.put("RQ_rq_id", rq_id);
+							mapRQ.put("RQ_source_tablenm", source_tablenm);
+							mapRQ.put("RQ_target_tablenm", target_tablenm);
+							mapRQ.put("RQ_run_flag", run_flag);
+							mapRQ.put("RQ_exec_sdate", exec_sdate);
+							mapRQ.put("RQ_exec_edate", exec_edate);
+							mapRQ.put("RQ_job_seq", qcLogFile.substring(1, qcLogFile.indexOf(")")));
+							listFforSheet3.add(mapRQ);
+							
+							txt += "JOB:\t" + qcLogFile + " \r\n"
 									+ "RQ_ID:\t" + control_id + "\t" + rq_id + "\t" + run_flag + " \r\n"
 									+ "Table:\t" + source_tablenm + " -> " + target_tablenm + " \r\n"
 									+ "DateTime:\t" + exec_sdate + " -> " + exec_edate + " \r\n\r\n";
+						}
 
 					}
 				}
