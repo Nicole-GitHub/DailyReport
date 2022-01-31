@@ -503,11 +503,19 @@ public class RunDailyReport {
 	 * @return
 	 */
 	private static boolean chkSheetForJobF(Sheet chkSheet, Map<String, String> map) {
+		String cellValue = "";
 		for (Row row : chkSheet) {
 			targetChkCell = row.getCell(1);
-			if (targetChkCell != null && row.getRowNum() > 0 && targetChkCell.getCellType() == Cell.CELL_TYPE_STRING
-					&& targetChkCell.getStringCellValue().equals(map.get("jobSeq"))) {
-				return false;
+			
+			if (targetChkCell != null && row.getRowNum() > 0) {
+				cellValue = "";
+				if (targetChkCell.getCellType() == Cell.CELL_TYPE_STRING)
+					cellValue = targetChkCell.getStringCellValue();
+				if (targetChkCell.getCellType() == Cell.CELL_TYPE_NUMERIC)
+					cellValue = String.valueOf((int) targetChkCell.getNumericCellValue());
+
+				if (cellValue.equals(map.get("jobSeq")))
+					return false;
 			}
 		}
 		return true;
