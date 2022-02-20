@@ -180,9 +180,9 @@ public class Tools {
 		Calendar cal = Calendar.getInstance();
 		int dayofWeek = getDayofWeek();
 		if(dayofWeek == 1) { // 週日
-			cal.add(cal.DATE, -1);
+			cal.add(Calendar.DATE, -1);
 		}else if(dayofWeek == 2) { // 週一
-			cal.add(cal.DATE, -2);
+			cal.add(Calendar.DATE, -2);
 		}
 		int chkDate = Integer.parseInt(getCalendar2String(cal,"yyyyMMdd"));
 		return chkDate;
