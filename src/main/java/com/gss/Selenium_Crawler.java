@@ -30,7 +30,7 @@ public class Selenium_Crawler {
 
 	protected static List<Map<String, String>> getMailContent(
 			String path, String[] inboxName, String account,
-			String pwd, Calendar cal, ArrayList<TreeMap<String, String>> listFforSheet3) {
+			String pwd, Calendar cal, ArrayList<TreeMap<String, String>> listFforSheet3) throws Exception {
 		
 		driver = null;
 		List<WebElement> listElement;

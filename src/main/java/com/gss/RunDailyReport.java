@@ -67,43 +67,53 @@ public class RunDailyReport {
 		pwd = mapProp.get("pwd");
 //		System.out.println("Mail密碼: " + pwd);
 
-		Workbook workbook = null;
-		OutputStream output = null;
 
-		try {
-			// 整理 MAIL內容
-			parserMailContent(path);
-
-			File f = new File(DailyReportExcel);
-			workbook = Tools.getWorkbook(DailyReportExcel, f);
-			Sheet sheet1 = workbook.getSheetAt(0);
-
-			// 日誌的月份 年月(六碼)
-			excelMonth = sheet1.getRow(0).getCell(0).getStringCellValue().trim();
-			excelMonth = excelMonth.substring(0, 7).trim();
-
-			// 寫入 "JobList" 頁籤的狀態，並整理出失敗的Job
-			writeSheet1(sheet1);
-
-			// 將失敗的job列進 "待辦JOB" 頁籤
-			writeSheet3(workbook);
-
-			System.out.println("Done!");
-
-			output = new FileOutputStream(f);
-			workbook.write(output);
-		} catch (Exception ex) {
-			System.out.println("runDailyReport catch Error:");
-			ex.printStackTrace();
-		} finally {
+		while (true) {
+			Workbook workbook = null;
+			OutputStream output = null;
 			try {
-				if (workbook != null)
-					workbook.close();
-				if (output != null)
-					output.close();
-			} catch (IOException ex) {
-				System.out.println("runDailyReport finally Error:");
+				// 整理 MAIL內容
+				parserMailContent(path);
+
+				File f = new File(DailyReportExcel);
+				workbook = Tools.getWorkbook(DailyReportExcel, f);
+				Sheet sheet1 = workbook.getSheetAt(0);
+
+				// 日誌的月份 年月(六碼)
+				excelMonth = sheet1.getRow(0).getCell(0).getStringCellValue().trim();
+				excelMonth = excelMonth.substring(0, 7).trim();
+
+				// 寫入 "JobList" 頁籤的狀態，並整理出失敗的Job
+				writeSheet1(sheet1);
+
+				// 將失敗的job列進 "待辦JOB" 頁籤
+				writeSheet3(workbook);
+
+				System.out.println("Done!");
+
+				output = new FileOutputStream(f);
+				workbook.write(output);
+
+				break;
+			} catch (Exception ex) {
+				if (ex.getMessage().contains("Current browser version is")) {
+					System.out.println("############################################################ \r\n"
+							+ "Please change your ChromeDriver version\r\n"
+							+ "############################################################ \r\n");
+				}
+				System.out.println("runDailyReport catch Error:");
 				ex.printStackTrace();
+				break;
+			} finally {
+				try {
+					if (workbook != null)
+						workbook.close();
+					if (output != null)
+						output.close();
+				} catch (IOException ex) {
+					System.out.println("runDailyReport finally Error:");
+					ex.printStackTrace();
+				}
 			}
 		}
 
@@ -129,9 +139,9 @@ public class RunDailyReport {
 	 *         map.put("jobEName", jobEName); // 英文名
 	 *         map.put("jobName", jobName); // 中文名
 	 *         map.put("jobRunRS", jobRunRS); // 執行結果
-	 * @throws ParseException
+	 * @throws Exception 
 	 */
-	private static void parserMailContent(String path) throws ParseException {
+	private static void parserMailContent(String path) throws Exception {
 		boolean isPm = false;
 		int hhInt = 0, arrLen = 0;
 		String jobRSText = "", jobRSDate = "", jobRSOriDate = "", jobRSTime = "", jobPeriod = "",
