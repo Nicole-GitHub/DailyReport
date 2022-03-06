@@ -179,8 +179,11 @@ System.out.println("chkDate="+chkDate);
 			}
 
 		} catch (Exception e) {
-			System.out.println("Selenium_Crawler Error：");
-			e.printStackTrace();
+			System.out.println("Selenium_Crawler Error：" + e.getMessage());
+			if (e.getMessage().contains("stale element reference: element is not attached to the page document")) {
+//				throw new RuntimeException("reRun");
+				listMap = getMailContent(path, inboxName, account, pwd, cal, listFforSheet3);
+			}
 		} finally {
 			driver.close();
 		}

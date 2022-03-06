@@ -3,3 +3,4 @@ target/
 .classpath
 .sts4-cache/
 bin/
+.DS_Store
