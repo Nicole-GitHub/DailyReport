@@ -48,6 +48,12 @@ public class Selenium_Crawler {
 		Map<String, String> mapProp = Property.getProperties(path);
 		Integer chkDate = Integer.valueOf(Tools.getCalendar2String(cal, "yyyyMMdd"));
 System.out.println("chkDate="+chkDate);
+
+		Calendar chkDateYesterday = cal;
+		chkDateYesterday.add(Calendar.DATE, -1);
+		Integer chkDateYesterdayInt = Integer.valueOf(Tools.getCalendar2String(chkDateYesterday, "yyyyMMdd"));
+System.out.println("chkDateYesterday="+chkDate);
+
 		String chromeDefaultDownloadPath = os.contains("Mac")
 				? mapProp.get("chromeDefaultDownloadPathMac")
 				: mapProp.get("chromeDefaultDownloadPathWindows");
@@ -145,7 +151,7 @@ System.out.println("chkDate="+chkDate);
 						 * 2 此mail的內容為job執行結果的mail
 						 * 3 收信時間在欲檢查的時間內
 						 */
-						if (download && body.indexOf(mailStartText) == 0 && isDownloadFile(jobRSDate, chkDate - 1)) {
+						if (download && body.indexOf(mailStartText) == 0 && isDownloadFile(jobRSDate, chkDateYesterdayInt)) {
 
 							em.click();
 							Thread.sleep(1000);
@@ -202,7 +208,7 @@ System.out.println("chkDate="+chkDate);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		String yy1 = "20"; // 西元年前兩碼
 
-		// 取 昨、今、明 三天的日期
+		// 取 昨、今 兩天的日期
 		Calendar cal = Calendar.getInstance();
 		String today = sdf.format(cal.getTime());
 		cal.add(Calendar.DATE, -1);
@@ -248,7 +254,7 @@ System.out.println("chkDate="+chkDate);
 				
 				while ("go".equals(scroll)) {
 					// 最少要滾到檢查日期的前兩天
-					for (int calArrLen = 2; calArrLen < chkMailDateLen; calArrLen++) {
+					for (int calArrLen = 1; calArrLen < chkMailDateLen; calArrLen++) {
 						dateisBlank = StringUtil
 								.isBlank(html.xpath("//li[contains(@aria-label,', " + calArr[calArrLen] + "')]").get());
 						// 若已滾到檢查日期的前兩天前則可停止
