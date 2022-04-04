@@ -23,7 +23,7 @@ public class DailyReportMain {
 			
 			// Debug
 			path = os.contains("Mac") ? "/Users/nicole/Dropbox/DailyReport/" // Mac
-					: "C:/Users/User/Dropbox/DailyReport/"; // win
+					: "C:/Users/Nicole/Dropbox/DailyReport/"; // win
 			
 			System.out.println("path: " + path);
 			Map<String, String> mapProp = Property.getProperties(path);
