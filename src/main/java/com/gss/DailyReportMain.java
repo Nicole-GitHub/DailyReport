@@ -1,6 +1,7 @@
 package com.gss;
 
 import java.io.File;
+import java.util.Date;
 import java.util.Map;
 
 public class DailyReportMain {
@@ -19,7 +20,8 @@ public class DailyReportMain {
 			String path = System.getProperty("user.dir") + File.separator; // Jar
 			
 			String os = System.getProperty("os.name");
-			System.out.println("===os.name===" + os);
+			System.out.println("=== NOW TIME ===> " + new Date());
+			System.out.println("===os.name===> " + os);
 			
 			// Debug
 			path = os.contains("Mac") ? "/Users/nicole/Dropbox/DailyReport/" // Mac
@@ -37,7 +39,15 @@ public class DailyReportMain {
 				ChkDailyReport.chkDailyReport(path);
 			} else {
 				// 整理日誌
-				RunDailyReport.runDailyReport(path);
+				boolean done = false;
+				do {
+					try {
+						RunDailyReport.runDailyReport(path);
+						done = true;
+					} catch (Exception e) {
+						System.out.println(new Date() + " ===> " + e);
+					}
+				} while(!done);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

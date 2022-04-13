@@ -186,12 +186,7 @@ System.out.println("chkDateYesterday="+chkDate);
 
 		} catch (Exception e) {
 			System.out.println("Selenium_Crawler Error：" + e.getMessage());
-////			if (e.getMessage().contains("stale element reference: element is not attached to the page document")) {
-////				throw new RuntimeException("reRun");
-//				driver.close();
-//				driver = null;
-//				listMap = getMailContent(path, inboxName, account, pwd, cal, listFforSheet3);
-////			}
+			throw e;
 		} finally {
 			if(driver != null)
 				driver.close();

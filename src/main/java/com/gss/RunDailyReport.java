@@ -39,7 +39,7 @@ public class RunDailyReport {
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	protected static void runDailyReport(String path) {
+	protected static void runDailyReport(String path) throws Exception {
 
 		Map<String, String> mapProp = Property.getProperties(path);
 		
@@ -100,9 +100,7 @@ public class RunDailyReport {
 							+ "Please change your ChromeDriver version\r\n"
 							+ "############################################################ \r\n");
 				}
-				System.out.println("runDailyReport catch Error:");
-				ex.printStackTrace();
-				break;
+				throw ex;
 			} finally {
 				try {
 					if (workbook != null)
