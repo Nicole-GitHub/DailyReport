@@ -47,12 +47,12 @@ public class Selenium_Crawler {
 		String os = System.getProperty("os.name");
 		Map<String, String> mapProp = Property.getProperties(path);
 		Integer chkDate = Integer.valueOf(Tools.getCalendar2String(cal, "yyyyMMdd"));
-System.out.println("chkDate="+chkDate);
+//System.out.println("chkDate="+chkDate);
 
 		Calendar chkDateYesterday = cal;
 		chkDateYesterday.add(Calendar.DATE, -1);
 		Integer chkDateYesterdayInt = Integer.valueOf(Tools.getCalendar2String(chkDateYesterday, "yyyyMMdd"));
-System.out.println("chkDateYesterday="+chkDate);
+//System.out.println("chkDateYesterday="+chkDateYesterday);
 
 		String chromeDefaultDownloadPath = os.contains("Mac")
 				? mapProp.get("chromeDefaultDownloadPathMac")

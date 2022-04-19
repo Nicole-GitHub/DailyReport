@@ -46,7 +46,7 @@ public class RunDailyReport {
 		
 		// 要從哪天的mail開始取
 		chkDate = "auto".equals(mapProp.get("chkDate")) ? Tools.getChkDate() : Integer.parseInt(mapProp.get("chkDate"));
-		System.out.println("要從 " + chkDate + " 的mail開始取 ");
+		System.out.println("chkDate = " + chkDate );
 
 		// 自動取得DailyReportExcel名稱 (檔名日期最多不超過6天前)(含路徑)
 		DailyReportExcelCName = mapProp.get("DailyReportExcelCName");
