@@ -187,7 +187,28 @@ public class Tools {
 		int chkDate = Integer.parseInt(getCalendar2String(cal,"yyyyMMdd"));
 		return chkDate;
 	}
-
+	
+	/**
+	 * 自動取得DailyReportExcel名稱 (檔名日期最多不超過6天前)(含路徑)
+	 * @return
+	 */
+	protected static String getDailyReportExcel(String path, String DailyReportExcelCName ,String DailyReportExcelExt) throws Exception {
+		Calendar cal = Calendar.getInstance();
+		String DailyReportExcelFull = path + DailyReportExcelCName + Tools.getCalendar2String(cal, "yyyyMMdd") + DailyReportExcelExt;
+		File f = new File(DailyReportExcelFull);
+		int i = 0;
+		while (!f.exists()) {
+			if(i++ > 5)
+				throw new Exception ("getDailyReportExcel Error");
+			cal.add(Calendar.DATE, -1);
+			DailyReportExcelFull = path + DailyReportExcelCName + Tools.getCalendar2String(cal, "yyyyMMdd")
+					+ DailyReportExcelExt; // 日報放置路徑與檔名
+			f = new File(DailyReportExcelFull);
+		}
+		
+		return DailyReportExcelFull;
+	}
+	
 	/**
 	 * 不足兩碼則前面補0
 	 * 

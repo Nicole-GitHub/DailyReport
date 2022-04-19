@@ -45,7 +45,9 @@ public class DailyReportMain {
 						RunDailyReport.runDailyReport(path);
 						done = true;
 					} catch (Exception e) {
-						System.out.println(new Date() + " ===> " + e);
+						System.out.println(new Date() + " ===> " + e.getMessage());
+						if("getDailyReportExcel Error".equals(e.getMessage()))
+							done = true;
 					}
 				} while(!done);
 			}

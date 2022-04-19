@@ -24,8 +24,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 public class RunDailyReport {
 	static final String mailStartText = " - 您好, 〔("; // job 寄的 mail 開頭
 	static Integer dateCell = 0, dataRow = 0, chkDate = 0, runtimeInt = 0;
-	static String JobMonth = "", JobDate = "", excelMonth = "", DailyReportExcel = "", account = "", pwd = "",
-			runtime = "";
+	static String JobMonth = "", JobDate = "", excelMonth = "", 
+			DailyReportExcelSource = "", DailyReportExcelTarget = "", DailyReportExcelCName = "", DailyReportExcelExt = "",
+			account = "", pwd = "",	runtime = "";
 	static boolean isPrint;
 	static Row targetRow;
 	static Cell targetCell, previouCell, targetChkCell, previouChkCell, runtimeCell;
@@ -47,10 +48,14 @@ public class RunDailyReport {
 		chkDate = "auto".equals(mapProp.get("chkDate")) ? Tools.getChkDate() : Integer.parseInt(mapProp.get("chkDate"));
 		System.out.println("要從 " + chkDate + " 的mail開始取 ");
 
-		// 日報放置路徑與檔名
-		DailyReportExcel = path + mapProp.get("DailyReportExcel"); // Jar
-		System.out.println("日誌Excel: " + DailyReportExcel);
-
+		// 自動取得DailyReportExcel名稱 (檔名日期最多不超過6天前)(含路徑)
+		DailyReportExcelCName = mapProp.get("DailyReportExcelCName");
+		DailyReportExcelExt = mapProp.get("DailyReportExcelExt");
+		DailyReportExcelSource = Tools.getDailyReportExcel(path, DailyReportExcelCName, DailyReportExcelExt);
+		System.out.println("日誌Excel: " + DailyReportExcelSource);
+		
+		DailyReportExcelTarget = path + DailyReportExcelCName + Tools.getToDay("yyyyMMdd") + DailyReportExcelExt;
+		
 		// 收件匣名稱
 		inboxName = mapProp.get("inboxName").split(",");
 		String inboxNameStr = "";
@@ -67,53 +72,51 @@ public class RunDailyReport {
 //		System.out.println("Mail密碼: " + pwd);
 
 
-		while (true) {
-			Workbook workbook = null;
-			OutputStream output = null;
+		Workbook workbook = null;
+		OutputStream output = null;
+		try {
+			// 整理 MAIL內容
+			parserMailContent(path);
+
+			File f = new File(DailyReportExcelSource);
+			workbook = Tools.getWorkbook(DailyReportExcelSource, f);
+			Sheet sheet1 = workbook.getSheetAt(0);
+
+			// 日誌的月份 年月(六碼)
+			excelMonth = sheet1.getRow(0).getCell(0).getStringCellValue().trim();
+			excelMonth = excelMonth.substring(0, 7).trim();
+
+			// 寫入 "JobList" 頁籤的狀態，並整理出失敗的Job
+			writeSheet1(sheet1);
+
+			// 將失敗的job列進 "待辦JOB" 頁籤
+			writeSheet3(workbook);
+
+			System.out.println("Done!");
+
+			output = new FileOutputStream(f);
+			workbook.write(output);
+
+			f.renameTo(new File(DailyReportExcelTarget)); //改名
+		} catch (Exception ex) {
+			if (ex.getMessage().contains("Current browser version is")) {
+				System.out.println("############################################################ \r\n"
+						+ "Please change your ChromeDriver version\r\n"
+						+ "############################################################ \r\n");
+			}
+			throw ex;
+		} finally {
 			try {
-				// 整理 MAIL內容
-				parserMailContent(path);
-
-				File f = new File(DailyReportExcel);
-				workbook = Tools.getWorkbook(DailyReportExcel, f);
-				Sheet sheet1 = workbook.getSheetAt(0);
-
-				// 日誌的月份 年月(六碼)
-				excelMonth = sheet1.getRow(0).getCell(0).getStringCellValue().trim();
-				excelMonth = excelMonth.substring(0, 7).trim();
-
-				// 寫入 "JobList" 頁籤的狀態，並整理出失敗的Job
-				writeSheet1(sheet1);
-
-				// 將失敗的job列進 "待辦JOB" 頁籤
-				writeSheet3(workbook);
-
-				System.out.println("Done!");
-
-				output = new FileOutputStream(f);
-				workbook.write(output);
-
-				break;
-			} catch (Exception ex) {
-				if (ex.getMessage().contains("Current browser version is")) {
-					System.out.println("############################################################ \r\n"
-							+ "Please change your ChromeDriver version\r\n"
-							+ "############################################################ \r\n");
-				}
-				throw ex;
-			} finally {
-				try {
-					if (workbook != null)
-						workbook.close();
-					if (output != null)
-						output.close();
-				} catch (IOException ex) {
-					System.out.println("runDailyReport finally Error:");
-					ex.printStackTrace();
-				}
+				if (workbook != null)
+					workbook.close();
+				if (output != null)
+					output.close();
+			} catch (IOException ex) {
+				System.out.println("runDailyReport finally Error:");
+				ex.printStackTrace();
 			}
 		}
-
+		
 		// 將失敗的job寫入file中 (填寫日誌清單_2021)
 		String txt = "";
 		for (Map<String, String> map : listF)
