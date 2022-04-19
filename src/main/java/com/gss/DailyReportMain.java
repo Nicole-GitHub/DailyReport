@@ -38,7 +38,11 @@ public class DailyReportMain {
 				// 檢查日誌
 				ChkDailyReport.chkDailyReport(path);
 			} else {
-				// 整理日誌
+				/**
+				 * 整理日誌
+				 * 當錯誤原因為找不到DailyReportExcel檔及ChromeDriver版本錯誤時
+				 * 則不再重跑
+				 */
 				boolean done = false;
 				do {
 					try {
@@ -46,10 +50,11 @@ public class DailyReportMain {
 						done = true;
 					} catch (Exception e) {
 						System.out.println(new Date() + " ===> " + e.getMessage());
-						if("getDailyReportExcel Error".equals(e.getMessage()))
+						if ("getDailyReportExcel Error".equals(e.getMessage())
+								|| e.getMessage().contains("This version of ChromeDriver only supports Chrome version"))
 							done = true;
 					}
-				} while(!done);
+				} while (!done);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
