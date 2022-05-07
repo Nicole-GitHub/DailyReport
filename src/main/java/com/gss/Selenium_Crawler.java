@@ -61,15 +61,17 @@ public class Selenium_Crawler {
 		String chromeDefaultDownloadPath = os.contains("Mac")
 				? mapProp.get("chromeDefaultDownloadPathMac")
 				: mapProp.get("chromeDefaultDownloadPathWindows");
-
+				
+		String chromeDriver = path + chromeDriverPath + chromeDriverName + "_" + chromeDriverVersion
+				+ (os.contains("Mac") ? "" : ".exe");
+		
 		String unZipFilePath = path + "QC(Log)_" + Tools.getToDay("yyyyMMddHHmmss") + "/";
 		
 		// Selenium
 		DesiredCapabilities capabilities = DesiredCapabilities.chrome();
 		capabilities.setCapability("chrome.switches", Arrays.asList("--start-maximized"));
-		System.setProperty("webdriver.chrome.driver",
-				path + chromeDriverPath + chromeDriverName + "_" + chromeDriverVersion
-						+ (os.contains("Mac") ? "" : ".exe"));
+		System.setProperty("webdriver.chrome.driver", chromeDriver);
+
 		driver = new ChromeDriver(capabilities);
 		
 		// 下載新的ChromeDriver
