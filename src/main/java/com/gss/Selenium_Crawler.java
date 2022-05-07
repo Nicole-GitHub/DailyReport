@@ -1,6 +1,12 @@
 package com.gss;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,10 +19,8 @@ import java.util.TreeMap;
 import org.jsoup.helper.StringUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import us.codecraft.webmagic.selector.Html;
@@ -24,7 +28,7 @@ import us.codecraft.webmagic.selector.Html;
 public class Selenium_Crawler {
 
 	static final String mailStartText = " - 您好, 〔("; // job 寄的 mail 開頭
-	static WebDriver driver = null;
+	static ChromeDriver driver = null;
 	static Html html;
 	static WebElement element;
 
@@ -46,24 +50,37 @@ public class Selenium_Crawler {
 
 		String os = System.getProperty("os.name");
 		Map<String, String> mapProp = Property.getProperties(path);
-		Integer chkDate = Integer.valueOf(Tools.getCalendar2String(cal, "yyyyMMdd"));
-//System.out.println("chkDate="+chkDate);
 
-		Calendar chkDateYesterday = cal;
-		chkDateYesterday.add(Calendar.DATE, -1);
-		Integer chkDateYesterdayInt = Integer.valueOf(Tools.getCalendar2String(chkDateYesterday, "yyyyMMdd"));
-//System.out.println("chkDateYesterday="+chkDateYesterday);
+		Calendar chkDate = cal;
+		chkDate.add(Calendar.DATE, -1);
+		Integer chkDateYesterdayInt = Integer.valueOf(Tools.getCalendar2String(chkDate, "yyyyMMdd"));
 
+		String chromeDriverPath = mapProp.get("chromeDriverPath");
+		String chromeDriverName = mapProp.get("chromeDriverName");
+		String chromeDriverVersion = mapProp.get("chromeDriverVersion");
 		String chromeDefaultDownloadPath = os.contains("Mac")
 				? mapProp.get("chromeDefaultDownloadPathMac")
 				: mapProp.get("chromeDefaultDownloadPathWindows");
 
+		String unZipFilePath = path + "QC(Log)_" + Tools.getToDay("yyyyMMddHHmmss") + "/";
+		
 		// Selenium
 		DesiredCapabilities capabilities = DesiredCapabilities.chrome();
 		capabilities.setCapability("chrome.switches", Arrays.asList("--start-maximized"));
 		System.setProperty("webdriver.chrome.driver",
-				path + mapProp.get("chromedriver") + (os.contains("Mac") ? "" : ".exe"));
+				path + chromeDriverPath + chromeDriverName + "_" + chromeDriverVersion
+						+ (os.contains("Mac") ? "" : ".exe"));
 		driver = new ChromeDriver(capabilities);
+		
+		// 下載新的ChromeDriver
+		String currentChromeVer = driver.getCapabilities().getVersion();
+		currentChromeVer = currentChromeVer.substring(0,currentChromeVer.indexOf("."));
+		if(!currentChromeVer.equals(chromeDriverVersion)) {
+			downloadChromeDriver(path, driver, chromeDefaultDownloadPath , mapProp);
+			// 改寫properties的chromeDriverVersion
+			chgChromeDriverVersionFromProp(path, currentChromeVer, chromeDriverVersion);
+		}
+			
 		driver.get(mapProp.get("webAddress"));
 		System.out.println("##start login ");
 
@@ -88,6 +105,7 @@ public class Selenium_Crawler {
 					if (em.getText().contains(str)) {
 						System.out.println(em.getText());
 						download = str.contains("失敗");
+						em.click();
 						/**
 						 * 因使用原em.click();
 						 * 常造成點擊第二個信箱項目時失敗
@@ -95,8 +113,7 @@ public class Selenium_Crawler {
 						 * (即使是透過舊版chrome driver開啟也一樣會被自動更新為新版)
 						 * 故改用Actions取代
 						 */
-//						em.click();
-						new Actions(driver).moveToElement(em).click().perform();
+//						new Actions(driver).moveToElement(em).click().perform();
 						break;
 					}
 				}
@@ -147,9 +164,9 @@ public class Selenium_Crawler {
 
 						/**
 						 * 下載附件的條件
-						 * 1 在失敗的資料夾內
-						 * 2 此mail的內容為job執行結果的mail
-						 * 3 收信時間在欲檢查的時間內
+						 * 1. 在失敗的資料夾內
+						 * 2. 此mail的內容為job執行結果的mail
+						 * 3. 收信時間在欲檢查的時間內
 						 */
 						if (download && body.indexOf(mailStartText) == 0 && isDownloadFile(jobRSDate, chkDateYesterdayInt)) {
 
@@ -159,14 +176,14 @@ public class Selenium_Crawler {
 							element.click();
 							Thread.sleep(2000);
 
-							title = element.getAttribute("title");
-							/**
-							 * 解壓檔案
-							 */
-							zipFile = new File(chromeDefaultDownloadPath + title);
+							// 解壓檔案並放置對應目錄下
+							zipFile = new File(chromeDefaultDownloadPath + element.getAttribute("title"));
 							unZipFile = "(" + job_seq + ")" + job_id;
-							Zip.unZipFiles(zipFile, chromeDefaultDownloadPath + unZipFile);
-
+							Zip.unZipFiles(zipFile, unZipFilePath + unZipFile);
+							
+							// 刪除下載的檔案
+							zipFile.delete();
+							
 							// 整理RQLog的相關資訊
 							qcLog = new HashMap<String, String>();
 							qcLog.put("qcLogFile", unZipFile);
@@ -180,7 +197,7 @@ public class Selenium_Crawler {
 					 * 整理出失敗的job資訊寫入jobF.txt
 					 */
 					if(download)
-						LogRename.logRename(path, qcLogList, chromeDefaultDownloadPath, listFforSheet3);
+						LogRename.logRename(path, qcLogList, unZipFilePath, listFforSheet3);
 				}
 			}
 
@@ -294,4 +311,149 @@ public class Selenium_Crawler {
 		return false;
 	}
 
+	/**
+	 * 下載新的ChromeDriver
+	 * 
+	 * @param path
+	 * @param driver
+	 * @param chromeDefaultDownloadPath
+	 * @param mapProp
+	 * @throws Exception
+	 */
+	private static void downloadChromeDriver(String path, ChromeDriver driver, String chromeDefaultDownloadPath,
+			Map<String, String> mapProp) throws Exception {
+
+		String method = "downloadChromeDriver";
+		List<WebElement> listElement;
+		List<Map<String,String>> listMap = new ArrayList<Map<String,String>>();
+		Map<String,String> map ;
+		String href = "", ver = "", unZipFilePath = "", unZipFileName = "", unZipFileNewName = "";
+		boolean boo = false;
+		File zipFile;
+		
+		String chromeDriverName = mapProp.get("chromeDriverName");
+		List<Integer> arrs = Arrays.asList(new Integer[] {5,7}); // 5:mac64 ; 7:win32
+		
+		driver.get("https://chromedriver.chromium.org/downloads");
+		System.out.println("##start " + method);
+		
+		try {
+			// 延迟加载，保证JS数据正常加载
+			Thread.sleep(1000);
+			
+			listElement = driver.findElements(By.cssSelector("#h\\.e02b498c978340a_87 > div > div > ul:nth-child(3) > li"));
+			int index = 0;
+			for (WebElement em : listElement) {
+				// 只有前三行才是載點
+				if(++index > 3)
+					break;
+				
+				href = em.findElement(By.cssSelector("li:nth-child(" + index + ") > p > span.aw5Odc > a"))
+						.getAttribute("href");
+				ver = href.substring(href.lastIndexOf("=") + 1);
+				ver = ver.substring(0,ver.indexOf("."));
+
+				map = new HashMap<String,String>();
+				map.put("href", href);
+				map.put("ver", ver);
+				listMap.add(map);
+			}
+
+			for (Map<String,String> forMap : listMap) {
+				driver.get(forMap.get("href"));
+				Thread.sleep(2000);
+				for (Integer i : arrs) {
+					
+					/**
+					 * 1. 判斷是否已有對應檔案
+					 * 2. 下載檔案
+					 * 3. 解壓檔案並放置對應目錄下
+					 * 4. 更名
+					 * 5. 刪除下載的檔案
+					 */
+					// 1
+					zipFile = new File(chromeDefaultDownloadPath + "chromedriver_" + (i == 5 ? "mac64" : "win32") + ".zip");
+					unZipFilePath = path + mapProp.get("chromeDriverPath");
+					unZipFileName = unZipFilePath + chromeDriverName + (i == 5 ? "" : ".exe");
+					unZipFileNewName = unZipFilePath + chromeDriverName + "_" + forMap.get("ver") + (i == 5 ? "" : ".exe");
+
+					if (new File(unZipFileNewName).exists()) {
+						boo = true;
+						break;
+					}
+					
+					// 2
+					driver.findElement(
+							By.cssSelector("body > table > tbody > tr:nth-child(" + i + ") > td:nth-child(2) > a"))
+							.click();
+					Thread.sleep(8000);
+
+					// 3
+					Zip.unZipFiles(zipFile, unZipFilePath);
+					Thread.sleep(3000);
+
+					new File(unZipFileName).renameTo(new File(unZipFileNewName)); // 4
+					zipFile.delete(); // 5
+				}
+				
+				if(boo)
+					break;
+			}
+			System.out.println("##END " + method);
+
+		} catch (Exception e) {
+			System.out.println(method + " Error：" + e.getMessage());
+			throw e;
+		}
+	}
+
+	/**
+	 * 改寫properties的chromeDriverVersion
+	 * 
+	 * @param path
+	 * @param currentChromeVer
+	 * @throws Exception
+	 */
+	private static void chgChromeDriverVersionFromProp(String path, String currentChromeVer, String chromeDriverVersion) throws Exception {
+		String method = "chgChromeDriverVersionFromProp";
+		String destFile = path + "config.properties";
+		String str = "" ;
+		FileOutputStream fos = null;
+		FileInputStream fis = null;
+		PrintWriter pw = null;
+		byte[] buffer = new byte[10240];
+		int s;
+
+		try {
+			File f = new File(destFile);
+
+			// 將原檔案內容讀出後修改currentChromeVer的值
+			fis = new FileInputStream(f);
+			while ((s = fis.read(buffer)) != -1) {
+				str += new String(buffer, 0, s)
+						.replace("chromeDriverVersion=" + chromeDriverVersion,
+								"chromeDriverVersion=" + currentChromeVer);
+			}
+
+			// 將整理好的內容寫入檔案內
+			fos = new FileOutputStream(f); // 第二參數設定是保留原有內容(預設false會刪)
+			fos.write(str.getBytes());
+
+			fos.flush();
+			// 若要設定編碼則需透過OutputStreamWriter
+			pw = new PrintWriter(new OutputStreamWriter(fos, StandardCharsets.UTF_8));
+		} catch (Exception ex) {
+			System.out.println(method + " Error：" + ex.getMessage());
+			throw ex;
+		} finally {
+			try {
+				fos.close();
+				fis.close();
+				pw.close();
+			} catch (IOException e) {
+				System.out.println(method + " Finally Error：" + e.getMessage());
+				throw e;
+			}
+		}
+	}
 }
