@@ -340,18 +340,18 @@ public class RunDailyReport {
 								listF.add(map);
 							}
 						}
-						// 將失敗的Job放入job待辦頁籤中 (不論是否應檢查)
-						if ("F".equals(map.get("jobRunRS"))) {
-							for(TreeMap<String,String> mapRQ : listFforSheet3) {
-								if(mapRQ.get("RQ_job_seq").equals(map.get("jobSeq"))){
-									mapRQ.putAll(map);
-									System.out.println("==== map putAll to mapRQ ===="); 
-									for (Entry<String, String> ent : mapRQ.entrySet()) {
-										System.out.println(ent.getKey() + " : " + ent.getValue() + " , ");
-									}
-								}
-							}
-						}
+//						// 將失敗的Job放入job待辦頁籤中 (不論是否應檢查)
+//						if ("F".equals(map.get("jobRunRS"))) {
+//							for(TreeMap<String,String> mapRQ : listFforSheet3) {
+//								if(mapRQ.get("RQ_job_seq").equals(map.get("jobSeq"))){
+//									mapRQ.putAll(map);
+//									System.out.println("==== map putAll to mapRQ ===="); 
+//									for (Entry<String, String> ent : mapRQ.entrySet()) {
+//										System.out.println(ent.getKey() + " : " + ent.getValue() + " , ");
+//									}
+//								}
+//							}
+//						}
 
 						System.out.println("changeCellValue====> dataRow=" + dataRow + ", dateCell=" + dateCell
 								+ ", Value=" + map.get("jobRunRS") + ", jobRSDateTime=" + map.get("jobRSDateTime")
@@ -359,6 +359,18 @@ public class RunDailyReport {
 
 						for (Entry<String, String> ent : map.entrySet()) {
 							System.out.println(ent.getKey() + " : " + ent.getValue() + " , ");
+						}
+					}
+				}
+				// 將失敗的Job放入job待辦頁籤中 (不論是否在清單內)
+				if ("F".equals(map.get("jobRunRS"))) {
+					for (TreeMap<String, String> mapRQ : listFforSheet3) {
+						if (mapRQ.get("RQ_job_seq").equals(map.get("jobSeq"))) {
+							mapRQ.putAll(map);
+							System.out.println("==== map putAll to mapRQ ====");
+							for (Entry<String, String> ent : mapRQ.entrySet()) {
+								System.out.println(ent.getKey() + " : " + ent.getValue() + " , ");
+							}
 						}
 					}
 				}
@@ -465,7 +477,7 @@ public class RunDailyReport {
 		// 再由後往前讀出來
 		while (listIterator.hasPrevious()) {
 			map = listIterator.previous();
-			// 若出現不在當月日誌清單內的失敗job則跳過
+			// 跳過非檢查區間及已重轉成功的job
 			if(map.get("jobRSDate") == null) {
 				continue;
 			}
