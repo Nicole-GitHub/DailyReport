@@ -395,6 +395,9 @@ public class Selenium_Crawler {
 					Thread.sleep(3000);
 
 					new File(unZipFileName).renameTo(new File(unZipFileNewName)); // 4
+					if(i == 5)
+						new File(unZipFileNewName).setExecutable(true, false); // mac檔案需調整權限後才能使用
+					
 					zipFile.delete(); // 5
 				}
 				
