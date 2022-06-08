@@ -37,7 +37,7 @@ public class DailyReportMain {
 			if (runType.equals("check")) {
 				// 檢查日誌
 				ChkDailyReport.chkDailyReport(path);
-			} else {
+			} else if (runType.equals("run")){
 				/**
 				 * 整理日誌
 				 * 當錯誤原因為找不到DailyReportExcel檔及ChromeDriver版本錯誤時
@@ -55,6 +55,8 @@ public class DailyReportMain {
 							done = true;
 					}
 				} while (!done);
+			} else {
+				System.out.println("runType Error");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
