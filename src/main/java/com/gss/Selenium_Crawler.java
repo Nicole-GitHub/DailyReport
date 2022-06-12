@@ -97,6 +97,7 @@ public class Selenium_Crawler {
 
 			// 等待三秒以確保頁面加載完整
 			Thread.sleep(3000);
+			int readInbox = 0;
 			
 			for (String str : inboxName) {
 				qcLogList = new ArrayList<Map<String, String>>();
@@ -106,8 +107,10 @@ public class Selenium_Crawler {
 				for (WebElement em : listElement) {
 					if (em.getText().contains(str)) {
 						System.out.println(em.getText());
+						// 失敗的job需下載附件
 						download = str.contains("失敗");
 						em.click();
+						readInbox++;
 						/**
 						 * 因使用原em.click();
 						 * 常造成點擊第二個信箱項目時失敗
@@ -202,7 +205,9 @@ public class Selenium_Crawler {
 						LogRename.logRename(path, qcLogList, unZipFilePath, listFforSheet3);
 				}
 			}
-
+			if(readInbox < inboxName.length)
+				throw new Exception("收件匣讀取數量過少!!");
+			
 		} catch (Exception e) {
 			System.out.println("Selenium_Crawler Error：" + e.getMessage());
 			throw e;
@@ -266,18 +271,29 @@ public class Selenium_Crawler {
 
 				// 因爬不只一個收件匣，故需將cal日期加回去
 				cal.add(Calendar.DATE, chkMailDateLen);
-				boolean dateisBlank = true;
+				boolean dateisBlank = true,dateisReach = false;
+				String checkStr = "", checkCal = "";
 				
 				while ("go".equals(scroll)) {
 					// 最少要滾到檢查日期的前兩天
-					for (int calArrLen = 1; calArrLen < chkMailDateLen; calArrLen++) {
-						dateisBlank = StringUtil
-								.isBlank(html.xpath("//li[contains(@aria-label,', " + calArr[calArrLen] + "')]").get());
+					for (int calArrLen = 0; calArrLen < chkMailDateLen; calArrLen++) {
+						checkCal = "//li[contains(@aria-label,', " + calArr[calArrLen] + " ')]";
+						dateisBlank = StringUtil.isBlank(html.xpath(checkCal).get());
 						// 若已滾到檢查日期的前兩天前則可停止
-						if (!dateisBlank)
-							break;
+						if (!dateisBlank) {
+							checkStr = html.xpath(checkCal).get();
+							checkStr = checkStr.substring(checkStr.indexOf(","), checkStr.indexOf("<div"));
+							checkStr = checkStr.substring(0, checkStr.lastIndexOf(","));
+							checkStr = checkStr.substring(checkStr.lastIndexOf(",") + 1);
+							checkStr = checkStr.substring(0, checkStr.lastIndexOf(" ")).trim();
+							// 為避免出現22/6/11也被22/6/1 contains 到，故加此段確保日期正確
+							if (checkStr.equals(calArr[calArrLen])) {
+								dateisReach = true;
+								break;
+							}
+						}
 					}
-					if (!dateisBlank)
+					if (!dateisBlank && dateisReach)
 						break;
 
 					html = new Html(element.getAttribute("outerHTML"));

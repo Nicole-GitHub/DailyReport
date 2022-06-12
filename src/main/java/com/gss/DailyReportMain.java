@@ -17,15 +17,18 @@ public class DailyReportMain {
 //			System.out.println("7:"+ System.getProperty("user.dir"));
 //			System.out.println("9:"+ System.getProperty("java.class.path"));
 
-			String path = System.getProperty("user.dir") + File.separator; // Jar
-			
 			String os = System.getProperty("os.name");
 			System.out.println("=== NOW TIME ===> " + new Date());
 			System.out.println("===os.name===> " + os);
 			
-			// Debug
-			path = os.contains("Mac") ? "/Users/nicole/Dropbox/DailyReport/" // Mac
-					: "C:/Users/Nicole/Dropbox/DailyReport/"; // win
+			// 判斷當前執行的啟動方式是IDE還是jar
+			boolean isStartupFromJar = new File(DailyReportMain.class.getProtectionDomain().getCodeSource().getLocation().getPath()).isFile();
+			System.out.println("isStartupFromJar: " + isStartupFromJar);
+
+			String path = System.getProperty("user.dir") + File.separator; // Jar
+			if(!isStartupFromJar) // IDE
+				path = os.contains("Mac") ? "/Users/nicole/Dropbox/DailyReport/" // Mac
+						: "C:/Users/Nicole/Dropbox/DailyReport/"; // win
 			
 			System.out.println("path: " + path);
 			Map<String, String> mapProp = Property.getProperties(path);
