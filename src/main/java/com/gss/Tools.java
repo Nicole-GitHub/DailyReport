@@ -181,9 +181,10 @@ public class Tools {
 		int dayofWeek = getDayofWeek();
 		if(dayofWeek == 1) { // 週日
 			cal.add(Calendar.DATE, -1);
-		}else if(dayofWeek == 2) { // 週一
-			cal.add(Calendar.DATE, -2);
 		}
+//		else if(dayofWeek == 2) { // 週一
+//			cal.add(Calendar.DATE, -2);
+//		}
 		int chkDate = Integer.parseInt(getCalendar2String(cal,"yyyyMMdd"));
 		return chkDate;
 	}
