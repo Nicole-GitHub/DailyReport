@@ -275,8 +275,8 @@ public class Selenium_Crawler {
 				String checkStr = "", checkCal = "";
 				
 				while ("go".equals(scroll)) {
-					// 最少要滾到檢查日期的前兩天
-					for (int calArrLen = 0; calArrLen < chkMailDateLen; calArrLen++) {
+					// 最少要滾到檢查日期的前兩天,故初始值為1
+					for (int calArrLen = 1; calArrLen < chkMailDateLen; calArrLen++) {
 						checkCal = "//li[contains(@aria-label,', " + calArr[calArrLen] + " ')]";
 						dateisBlank = StringUtil.isBlank(html.xpath(checkCal).get());
 						// 若已滾到檢查日期的前兩天前則可停止
