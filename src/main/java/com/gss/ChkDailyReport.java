@@ -24,11 +24,9 @@ public class ChkDailyReport {
 		int minRunMonth = 0, maxRunMonth = 0, minusDays = 0, dateCell = 0;
 		Cell targetCell;
 
-//		path = "/Users/nicole/22/java/eclipse-workspace/DailyReport/src/main/java/com/gss/DailyReport/"; // Debug
 		System.out.println("path: " + path);
-
 		Map<String, String> mapProp = Property.getProperties(path);
-//		path = "/Users/nicole/Downloads/"; // Debug
+
 		// 日報放置路徑與檔名
 		String ChkDailyReportExcel = mapProp.get("ChkDailyReportExcel"); // Jar
 		String DailyReportExcel = path + ChkDailyReportExcel; // Jar
