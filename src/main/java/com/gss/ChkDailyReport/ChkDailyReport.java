@@ -1,4 +1,4 @@
-package com.gss;
+package com.gss.ChkDailyReport;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,9 +15,12 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.gss.Property;
+import com.gss.Tools;
+
 public class ChkDailyReport {
 
-	protected static void chkDailyReport(String path) {
+	public static void chkDailyReport(String path) {
 		XSSFWorkbook xssfWorkbook = null;
 		OutputStream output = null;
 		String minRunDate = "", maxRunDate = "", minRunDay = "";

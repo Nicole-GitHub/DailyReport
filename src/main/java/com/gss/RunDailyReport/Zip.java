@@ -1,4 +1,4 @@
-package com.gss;
+package com.gss.RunDailyReport;
 
 import java.io.File;
 import java.io.FileInputStream;

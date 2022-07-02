@@ -4,6 +4,10 @@ import java.io.File;
 import java.util.Date;
 import java.util.Map;
 
+import com.gss.ChkDailyReport.ChkDailyReport;
+import com.gss.MonthReport.MonthReport;
+import com.gss.RunDailyReport.RunDailyReport;
+
 public class DailyReportMain {
 
 	public static void main(String[] args) {
@@ -38,8 +42,9 @@ public class DailyReportMain {
 			System.out.println("執行類別: " + runType);
 
 			if (runType.equals("check")) {
-				// 檢查日誌
-				ChkDailyReport.chkDailyReport(path);
+				ChkDailyReport.chkDailyReport(path); // 檢查日誌
+			} else if (runType.equals("month")) {
+				MonthReport.monthReport(path); // 檢查日誌
 			} else if (runType.equals("run")){
 				/**
 				 * 整理日誌

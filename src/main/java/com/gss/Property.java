@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Properties;
 
 public class Property {
-	protected static Map<String, String> getProperties(String path) {
+	public static Map<String, String> getProperties(String path) {
 		Map<String, String> map = new HashMap<String, String>();
 		Properties prop = new Properties();
 

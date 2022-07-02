@@ -29,7 +29,7 @@ public class Tools {
 	 * @param path
 	 * @return
 	 */
-	protected static Workbook getWorkbook(String path, File f) {
+	public static Workbook getWorkbook(String path, File f) {
 		Workbook workbook = null;
 		InputStream inputStream = null;
 		try {
@@ -71,7 +71,7 @@ public class Tools {
 	 * 
 	 * @return
 	 */
-	protected static Integer getDateCell(Sheet sheet1, String JobDate) {
+	public static Integer getDateCell(Sheet sheet1, String JobDate) {
 		for (Cell cell : sheet1.getRow(0)) {
 			if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
 				if (cell.getNumericCellValue() == Double.valueOf(JobDate))
@@ -84,7 +84,7 @@ public class Tools {
 		return 0;
 	}
 
-	protected static void setCellStyle(int setColNum, Cell cell, CellStyle cellStyle, Row row, Sheet sheet3,
+	public static void setCellStyle(int setColNum, Cell cell, CellStyle cellStyle, Row row, Sheet sheet3,
 			Sheet sheet4, String desc) {
 		cell = row.createCell(setColNum);
 		cell.setCellValue(desc);
@@ -98,7 +98,7 @@ public class Tools {
 	 * 
 	 * @throws ParseException
 	 */
-	protected static int getMinusDays(int chkDate) throws ParseException {
+	public static int getMinusDays(int chkDate) throws ParseException {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 
 		Calendar before = Calendar.getInstance();// 檢查日
@@ -116,7 +116,7 @@ public class Tools {
 	 * @param delimiter
 	 * @return
 	 */
-	protected static String getToDay (String format) {
+	public static String getToDay (String format) {
 		Calendar cal = Calendar.getInstance();
 		return getCalendar2String(cal,format);
 	}
@@ -128,7 +128,7 @@ public class Tools {
 	 * @param format
 	 * @return
 	 */
-	protected static String getCalendar2String(Calendar cal, String format) {
+	public static String getCalendar2String(Calendar cal, String format) {
 		SimpleDateFormat sdf = new SimpleDateFormat(format);
 		return sdf.format(cal.getTime());
 	}
@@ -140,7 +140,7 @@ public class Tools {
 	 * @param format
 	 * @return
 	 */
-	protected static String getDate2String(Date date, String format) {
+	public static String getDate2String(Date date, String format) {
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat(format);
 		cal.setTime(date);
@@ -155,7 +155,7 @@ public class Tools {
 	 * @return
 	 * @throws ParseException 
 	 */
-	protected static Date getString2Date(String dateStr, String format) throws ParseException {
+	public static Date getString2Date(String dateStr, String format) throws ParseException {
 		SimpleDateFormat sdf = new SimpleDateFormat(format);
 		return sdf.parse(dateStr);
 	}
@@ -176,7 +176,7 @@ public class Tools {
 	 * 自動取得檢查日
 	 * @return
 	 */
-	protected static int getChkDate() {
+	public static int getChkDate() {
 		Calendar cal = Calendar.getInstance();
 		int dayofWeek = getDayofWeek();
 		if(dayofWeek == 1) { // 週日
@@ -193,7 +193,7 @@ public class Tools {
 	 * 自動取得DailyReportExcel名稱 (檔名日期最多不超過6天前)(含路徑)
 	 * @return
 	 */
-	protected static String getDailyReportExcel(String path, String DailyReportExcelCName ,String DailyReportExcelExt) throws Exception {
+	public static String getDailyReportExcel(String path, String DailyReportExcelCName ,String DailyReportExcelExt) throws Exception {
 		Calendar cal = Calendar.getInstance();
 		String DailyReportExcelFull = path + DailyReportExcelCName + Tools.getCalendar2String(cal, "yyyyMMdd") + DailyReportExcelExt;
 		File f = new File(DailyReportExcelFull);
@@ -211,19 +211,20 @@ public class Tools {
 	}
 	
 	/**
-	 * 不足兩碼則前面補0
+	 * 不足num碼則前面補0
 	 * 
 	 * @param str
+	 * @param num
 	 * @return
 	 */
-	protected static String getLen2(String str) {
-		return str.length() < 2 ? "0" + str : str;
+	public static String setLen(String str, int num) {
+		return str.length() < num ? "0" + str : str;
 	}
 	
 	/**
      * 不為空
      */
-	protected static boolean isntBlank(Cell cell) {
+	public static boolean isntBlank(Cell cell) {
 		return cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK;
 	}
 	
@@ -232,7 +233,7 @@ public class Tools {
 	 * 
 	 * @param path
 	 */
-	protected static void writeListFtoFile(String path, String str, boolean end) {
+	public static void writeListFtoFile(String path, String str, boolean end) {
 	    String destFile = path + "/JobF.txt";
 	    FileOutputStream fos = null ;
 	    FileInputStream fis = null ;

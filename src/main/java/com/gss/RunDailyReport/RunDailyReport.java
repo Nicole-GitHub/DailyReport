@@ -1,4 +1,4 @@
-package com.gss;
+package com.gss.RunDailyReport;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,6 +21,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import com.gss.Property;
+import com.gss.Tools;
+
 public class RunDailyReport {
 	static final String mailStartText = " - 您好, 〔("; // job 寄的 mail 開頭
 	static Integer dateCell = 0, dataRow = 0, chkDate = 0, runtimeInt = 0;
@@ -40,7 +43,7 @@ public class RunDailyReport {
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	protected static void runDailyReport(String path) throws Exception {
+	public static void runDailyReport(String path) throws Exception {
 
 		Map<String, String> mapProp = Property.getProperties(path);
 		
@@ -203,7 +206,7 @@ public class RunDailyReport {
 				hhInt = hhInt == 12 ? 0 : hhInt; // 0 ~ 11
 				hhInt = hhInt + (isPm ? 12 : 0); // 0 ~ 23
 				// mail收到的時間(24小時制)
-				jobRSTime = Tools.getLen2(String.valueOf(hhInt)) + time.substring(time.indexOf(":")); // 22:22
+				jobRSTime = Tools.setLen(String.valueOf(hhInt), 2) + time.substring(time.indexOf(":")); // 22:22
 				// job 所屬日期 (日誌用)
 				jobRSDate = jobMailTitleArr[arrLen - 2].trim();
 				// job 原日期 (後面刪除相同job時使用)

@@ -1,4 +1,4 @@
-package com.gss;
+package com.gss.RunDailyReport;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,6 +22,9 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
+
+import com.gss.Property;
+import com.gss.Tools;
 
 import us.codecraft.webmagic.selector.Html;
 
@@ -242,7 +245,7 @@ public class Selenium_Crawler {
 			String yy2 = jobRSDateArr[0];
 			String mm = jobRSDateArr[1];
 			String dd = jobRSDateArr[2].substring(0, jobRSDateArr[2].length() - 1);
-			jobRSOriDate = yy1 + yy2 + Tools.getLen2(mm) + Tools.getLen2(dd);
+			jobRSOriDate = yy1 + yy2 + Tools.setLen(mm, 2) + Tools.setLen(dd, 2);
 		}
 		return Integer.valueOf(jobRSOriDate) >= chkDate;
 	}
