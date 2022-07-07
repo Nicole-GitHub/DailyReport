@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
@@ -21,7 +22,7 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import com.gss.DailyReportMain;
+//import com.gss.DailyReportMain;
 import com.gss.Property;
 import com.gss.Tools;
 
@@ -259,14 +260,15 @@ public class MonthReport {
 		XSSFFont font = xssfWorkbook.createFont();
 		font.setFontHeightInPoints((short) 10);
 		font.setFontName("微軟正黑體");
-
+		
 		XSSFCellStyle style = xssfWorkbook.createCellStyle();
+		short borderStyle = CellStyle.BORDER_THIN;
 		style.setVerticalAlignment(XSSFCellStyle.VERTICAL_TOP); // 垂直置上
 		style.setAlignment(XSSFCellStyle.ALIGN_LEFT); // 水平置左
-		style.setBorderTop(XSSFCellStyle.BORDER_THIN); // 上邊框
-		style.setBorderBottom(XSSFCellStyle.BORDER_THIN); // 下邊框
-		style.setBorderLeft(XSSFCellStyle.BORDER_THIN); // 左邊框
-		style.setBorderRight(XSSFCellStyle.BORDER_THIN); // 右邊框
+		style.setBorderTop(borderStyle); // 上邊框
+		style.setBorderBottom(borderStyle); // 下邊框
+		style.setBorderLeft(borderStyle); // 左邊框
+		style.setBorderRight(borderStyle); // 右邊框
 		style.setWrapText(true); // 自動換行
 		style.setFont(font);
 
