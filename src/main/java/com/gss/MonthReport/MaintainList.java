@@ -57,7 +57,9 @@ public class MaintainList {
 		System.out.println("維護問題紀錄單Excel: " + maintainListExcel);
 		System.out.println("月報Excel: " + monthReportExcel);
 
+		System.out.println(new Date());
 		maintainList(maintainListExcel);
+		System.out.println(new Date());
 	}
 
 	private static final SimpleDateFormat sdfDateTime = new SimpleDateFormat("yyyy/MM/dd HH:mm");
@@ -65,7 +67,7 @@ public class MaintainList {
 	private static final SimpleDateFormat sdfMM = new SimpleDateFormat("yyyyMM");
 	private static final DecimalFormat df = new DecimalFormat("#.#");
 	private static Date acceptDate, replyDate, dueDate, actDate, date;
-	private static String issueType, validResult;
+	private static String issueType, validResult, styleType;
 	private static String[] validResultArr;
 	private static long diffrence;
 	private static final TimeUnit time = TimeUnit.MINUTES;
@@ -76,9 +78,10 @@ public class MaintainList {
 	private static final List<String> listToolsModule = Arrays
 			.asList(new String[] { "SAFENET", "DATASTAGE", "HADOOP", "WEBFOCUS", "IA" });
 	private static List<String> listCell;
-	private static XSSFCellStyle style;
+	private static XSSFCellStyle style, errStyle, normalStyle, titleStyle;
 	private static short dfDecimal, dfNormal, dfDate, dfDateTime;
 	private static Row row;
+	
 
 	private static void setDataFormat(XSSFWorkbook xssfWorkbook) {
 		XSSFDataFormat xssfdf = xssfWorkbook.createDataFormat();
@@ -87,6 +90,13 @@ public class MaintainList {
 		dfDate = xssfdf.getFormat("yyyy/MM/dd");
 		dfDateTime = xssfdf.getFormat("yyyy/MM/dd hh:mm");
 	}
+	
+	private static void setStyleInit(XSSFWorkbook xssfWorkbook) {
+		errStyle = setStyle(xssfWorkbook, "ERR");
+		normalStyle = setStyle(xssfWorkbook, "Normal");
+		titleStyle = setStyle(xssfWorkbook, "Title");
+	}
+
 
 	private static void setVarInit() {
 
@@ -109,6 +119,8 @@ public class MaintainList {
 			// XSSF (.xlsx)
 			xssfWorkbook = new XSSFWorkbook(inputStream);
 			setDataFormat(xssfWorkbook);
+			setStyleInit(xssfWorkbook);
+			
 			/**
 			 * 因remove完後getNumberOfSheets的結果就會-1，原本的sheet4也會變成sheet3，故從尾開始跑
 			 */
@@ -192,7 +204,10 @@ public class MaintainList {
 
 			validResult = dataCell.get(dataCell.size() - 1);
 			validResultArr = validResult.split(",");
-			style = setStyle(xssfWorkbook, validResultArr[0]);
+			styleType = validResultArr[0].indexOf("-") >= 0
+					? validResultArr[0].substring(0, validResultArr[0].indexOf("-"))
+					: validResultArr[0];
+			style = "ERR".equals(styleType) ? errStyle : normalStyle;
 
 			setCellStyle(row, colnum++, style, dfNormal).setCellFormula("ROW()-5");
 			setCellStyle(row, colnum++, style, dfDateTime).setCellValue(dataCell.get(0));
@@ -296,7 +311,10 @@ public class MaintainList {
 
 			validResult = dataCell.get(dataCell.size() - 1);
 			validResultArr = validResult.split(",");
-			style = setStyle(xssfWorkbook, validResultArr[0]);
+			styleType = validResultArr[0].indexOf("-") >= 0
+					? validResultArr[0].substring(0, validResultArr[0].indexOf("-"))
+					: validResultArr[0];
+			style = "ERR".equals(styleType) ? errStyle : normalStyle;
 
 			setCellStyle(row, colnum++, style, dfNormal).setCellFormula("ROW()-5");
 			setCellStyle(row, colnum++, style, dfDateTime).setCellValue(dataCell.get(4));
@@ -387,7 +405,10 @@ public class MaintainList {
 
 			validResult = dataCell.get(dataCell.size() - 1);
 			validResultArr = validResult.split(",");
-			style = setStyle(xssfWorkbook, validResultArr[0]);
+			styleType = validResultArr[0].indexOf("-") >= 0
+					? validResultArr[0].substring(0, validResultArr[0].indexOf("-"))
+					: validResultArr[0];
+			style = "ERR".equals(styleType) ? errStyle : normalStyle;
 
 			setCellStyle(row, colnum++, style, dfNormal).setCellFormula(dataCell.get(0));
 			setCellStyle(row, colnum++, style, dfDateTime).setCellValue(dataCell.get(1));
@@ -437,7 +458,6 @@ public class MaintainList {
 	 * @return
 	 */
 	private static XSSFCellStyle setStyle(XSSFWorkbook xssfWorkbook, String type) {
-		type = type.indexOf("-") >= 0 ? type.substring(0,type.indexOf("-")) : type;
 		
 		XSSFFont font = xssfWorkbook.createFont();
 		font.setFontHeightInPoints((short) ("Title".equals(type) ? 14 : 10));
@@ -492,7 +512,7 @@ public class MaintainList {
 	private static void setTitleRow(XSSFWorkbook xssfWorkbook, Row row, XSSFSheet sheet) {
 		int colnum = 0;
 
-		style = setStyle(xssfWorkbook, "Title");
+		style = titleStyle;
 		List<Integer> widthCols15 = Arrays.asList(new Integer[] { 5, 9, 10 });
 		List<Integer> widthCols20 = Arrays.asList(new Integer[] { 1, 2, 6, 8, 15, 19 });
 		List<Integer> widthCols35 = Arrays.asList(new Integer[] { 8 });
