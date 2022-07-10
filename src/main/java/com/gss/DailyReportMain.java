@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Map;
 
 import com.gss.ChkDailyReport.ChkDailyReport;
+import com.gss.MonthReport.MaintainList;
 import com.gss.MonthReport.MonthReport;
 import com.gss.RunDailyReport.RunDailyReport;
 
@@ -37,14 +38,23 @@ public class DailyReportMain {
 			System.out.println("path: " + path);
 			Map<String, String> mapProp = Property.getProperties(path);
 
+			// 月報放置路徑與檔名
+			String monthReportPath = mapProp.get("MonthReportPath");
+			String maintainListExcel = path + monthReportPath+mapProp.get("MaintainListExcel"); // Jar
+			String monthReportExcel = path + monthReportPath+mapProp.get("MonthReportExcel"); // Jar
+			System.out.println("維護問題紀錄單Excel: " + maintainListExcel);
+			System.out.println("月報Excel: " + monthReportExcel);
+			
 			// 執行類別
 			String runType = mapProp.get("runType");
 			System.out.println("執行類別: " + runType);
 
 			if (runType.equals("check")) {
 				ChkDailyReport.chkDailyReport(path); // 檢查日誌
+			} else if (runType.equals("maintain")) {
+				MaintainList.maintainList(maintainListExcel); // 檢查日誌
 			} else if (runType.equals("month")) {
-				MonthReport.monthReport(path); // 檢查日誌
+				MonthReport.monthReport(monthReportExcel); // 檢查日誌
 			} else if (runType.equals("run")){
 				/**
 				 * 整理日誌
