@@ -33,7 +33,7 @@ public class RunDailyReport {
 	static boolean isPrint;
 	static Row targetRow;
 	static Cell targetCell, previouCell, targetChkCell, previouChkCell, runtimeCell;
-	static ArrayList<Map<String, String>> listF, list;
+	static ArrayList<Map<String, String>> listF, listClean, listAll;
 	static ArrayList<TreeMap<String, String>> listFforSheet3;
 	static String[] inboxName;
 
@@ -151,7 +151,7 @@ public class RunDailyReport {
 				jobSeq = "", jobEName = "", jobName = "", jobRunRS = "", time = "";
 		String[] jobMailTitleArr;
 		Map<String, String> map;
-		list = new ArrayList<Map<String, String>>();
+		listClean = new ArrayList<Map<String, String>>();
 		List<Map<String, String>> listMail;
 		listFforSheet3 = new ArrayList<TreeMap<String, String>>();
 		
@@ -252,11 +252,9 @@ public class RunDailyReport {
 					map.put("jobEName", jobEName);
 					map.put("jobName", jobName);
 					map.put("jobRunRS", jobRunRS);
-					list.add(map);
+					listClean.add(map);
 
 					System.out.println("======================== Start ========================");
-//					System.out.println("jobRSDate 日誌日期 => " + jobRSDate);
-//					System.out.println("jobRSTime job時間 => " + jobRSTime);
 					System.out.println("jobRSDateTime 日誌日期時間 => " + jobRSDate + " " + jobRSTime);
 					System.out.println("jobRSOriDateTime job原日期時間 => " + jobRSOriDate + " " + jobRSTime);
 					System.out.println("jobPeriod job執行區間 => " + jobPeriod);
@@ -270,12 +268,12 @@ public class RunDailyReport {
 		}
 
 		// clone一份出來以免remove時影響到
-		ArrayList<Map<String, String>> list2 = new ArrayList<Map<String, String>>(list);
-		Iterator<Map<String, String>> iterator = list.iterator();
+		listAll = new ArrayList<Map<String, String>>(listClean);
+		Iterator<Map<String, String>> iterator = listClean.iterator();
 		Map<String, String> chkMap;
 		while (iterator.hasNext()) {
 			chkMap = iterator.next();
-			for (Map<String, String> chkMap2 : list2) {
+			for (Map<String, String> chkMap2 : listAll) {
 				if (chkMap.get("jobEName").equals(chkMap2.get("jobEName"))
 						&& chkMap.get("jobPeriod").equals(chkMap2.get("jobPeriod"))
 						&& chkMap.get("jobRSDate").equals(chkMap2.get("jobRSDate"))
@@ -300,7 +298,7 @@ public class RunDailyReport {
 	 */
 	private static void writeSheet1(Sheet sheet1) throws Exception {
 		listF = new ArrayList<Map<String, String>>();
-		for (Map<String, String> map : list) {
+		for (Map<String, String> map : listClean) {
 			JobMonth = map.get("jobRSDate").substring(0, 6);
 			JobDate = map.get("jobRSDate").substring(6);
 			// 判斷是否為當月的日誌
@@ -313,8 +311,8 @@ public class RunDailyReport {
 				// 取得對應Job的Row位置(橫列)
 				for (Row row : sheet1) {
 					if (Tools.isntBlank(row.getCell(0))
-						&& row.getCell(0).getStringCellValue().replaceAll("\u00A0", "").equals(map.get("jobEName"))
-					) {
+							&& row.getCell(0).getStringCellValue().replaceAll("\u00A0", "")
+									.equals(map.get("jobEName"))) {
 						dataRow = row.getRowNum();
 
 						// 將執行結果設定至對應位置
@@ -343,18 +341,6 @@ public class RunDailyReport {
 								listF.add(map);
 							}
 						}
-//						// 將失敗的Job放入job待辦頁籤中 (不論是否應檢查)
-//						if ("F".equals(map.get("jobRunRS"))) {
-//							for(TreeMap<String,String> mapRQ : listFforSheet3) {
-//								if(mapRQ.get("RQ_job_seq").equals(map.get("jobSeq"))){
-//									mapRQ.putAll(map);
-//									System.out.println("==== map putAll to mapRQ ===="); 
-//									for (Entry<String, String> ent : mapRQ.entrySet()) {
-//										System.out.println(ent.getKey() + " : " + ent.getValue() + " , ");
-//									}
-//								}
-//							}
-//						}
 
 						System.out.println("changeCellValue====> dataRow=" + dataRow + ", dateCell=" + dateCell
 								+ ", Value=" + map.get("jobRunRS") + ", jobRSDateTime=" + map.get("jobRSDateTime")
@@ -365,20 +351,23 @@ public class RunDailyReport {
 						}
 					}
 				}
-				// 將失敗的Job放入job待辦頁籤中 (不論是否在清單內)
-				if ("F".equals(map.get("jobRunRS"))) {
-					for (TreeMap<String, String> mapRQ : listFforSheet3) {
-						if (mapRQ.get("RQ_job_seq").equals(map.get("jobSeq"))) {
-							mapRQ.putAll(map);
-							System.out.println("==== map putAll to mapRQ ====");
-							for (Entry<String, String> ent : mapRQ.entrySet()) {
-								System.out.println(ent.getKey() + " : " + ent.getValue() + " , ");
-							}
+			} else {
+				System.out.println("日誌月份錯誤");
+			}
+		}
+
+		// 將詳細Job資訊補入listFforSheet3內
+		for (Map<String, String> map : listAll) {
+			if ("F".equals(map.get("jobRunRS"))) {
+				for (TreeMap<String, String> mapRQ : listFforSheet3) {
+					if (mapRQ.get("RQ_job_seq").equals(map.get("jobSeq"))) {
+						mapRQ.putAll(map);
+						System.out.println("==== map putAll to mapRQ ====");
+						for (Entry<String, String> ent : mapRQ.entrySet()) {
+							System.out.println(ent.getKey() + " : " + ent.getValue() + " , ");
 						}
 					}
 				}
-			}else {
-				System.out.println("日誌月份錯誤");
 			}
 		}
 
