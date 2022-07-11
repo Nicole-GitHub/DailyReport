@@ -270,7 +270,7 @@ public class RunDailyReport {
 		}
 
 		// clone一份出來以免remove時影響到
-		ArrayList<Map<String, String>> list2 = (ArrayList) list.clone();
+		ArrayList<Map<String, String>> list2 = new ArrayList<Map<String, String>>(list);
 		Iterator<Map<String, String>> iterator = list.iterator();
 		Map<String, String> chkMap;
 		while (iterator.hasNext()) {
