@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import org.jsoup.helper.StringUtil;
 import org.openqa.selenium.By;
@@ -208,8 +209,21 @@ public class Selenium_Crawler {
 						LogRename.logRename(path, qcLogList, unZipFilePath, listFforSheet3);
 				}
 			}
+			
+			// 若未讀取完整，則拋Exception
 			if(readInbox < inboxName.length)
 				throw new Exception("收件匣讀取數量過少!!");
+			
+			boolean isOK = false;
+			for (Map<String, String> listmap : listMap) {
+				if(listmap.get("title").contains("執行成功=>")) {
+					isOK = true;
+					break;
+				}
+			}
+			
+			if(!isOK)
+				throw new Exception("收件匣讀取不完整!!");
 			
 		} catch (Exception e) {
 			System.out.println("Selenium_Crawler Error：" + e.getMessage());
