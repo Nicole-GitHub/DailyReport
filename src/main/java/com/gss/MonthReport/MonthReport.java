@@ -108,13 +108,13 @@ public class MonthReport {
 			// XSSF (.xlsx)
 			xssfWorkbook = new XSSFWorkbook(inputStream);
 			setDataFormat(xssfWorkbook);
-			/**
-			 * 因remove完後getNumberOfSheets的結果就會-1，原本的sheet4也會變成sheet3，故從尾開始跑
-			 */
-			for (int i = xssfWorkbook.getNumberOfSheets(); i > 0; i--) {
-				if (i > 3)
-					xssfWorkbook.removeSheetAt(i - 1);
-			}
+//			/**
+//			 * 因remove完後getNumberOfSheets的結果就會-1，原本的sheet4也會變成sheet3，故從尾開始跑
+//			 */
+//			for (int i = xssfWorkbook.getNumberOfSheets(); i > 0; i--) {
+//				if (i > 3)
+//					xssfWorkbook.removeSheetAt(i - 1);
+//			}
 
 			setJira(xssfWorkbook);
 //			setGoogleDoc(xssfWorkbook);

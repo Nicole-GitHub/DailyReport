@@ -52,9 +52,9 @@ public class DailyReportMain {
 			if (runType.equals("check")) {
 				ChkDailyReport.chkDailyReport(path); // 檢查日誌
 			} else if (runType.equals("maintain")) {
-				MaintainList.maintainList(maintainListExcel); // 檢查日誌
+				MaintainList.maintainList(maintainListExcel); // 整理維護問題紀錄單Excel
 			} else if (runType.equals("month")) {
-				MonthReport.monthReport(monthReportExcel); // 檢查日誌
+				MonthReport.monthReport(monthReportExcel); // 整理月報
 			} else if (runType.equals("run")){
 				/**
 				 * 整理日誌

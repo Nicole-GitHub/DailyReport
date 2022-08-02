@@ -112,7 +112,8 @@ public class MaintainList {
 	public static void maintainList(String maintainListExcel) {
 		XSSFWorkbook xssfWorkbook = null;
 		OutputStream output = null;
-
+		int itemCount = 0;
+		
 		try {
 			File f = new File(maintainListExcel);
 			InputStream inputStream = new FileInputStream(f);
@@ -121,17 +122,19 @@ public class MaintainList {
 			setDataFormat(xssfWorkbook);
 			setStyleInit(xssfWorkbook);
 			
-			/**
-			 * 因remove完後getNumberOfSheets的結果就會-1，原本的sheet4也會變成sheet3，故從尾開始跑
-			 */
-			for (int i = xssfWorkbook.getNumberOfSheets(); i > 0; i--) {
-				if (i > 3)
-					xssfWorkbook.removeSheetAt(i - 1);
-			}
+			itemCount = setJira(xssfWorkbook,itemCount);
+System.out.println("Jira Done !");
 
-			setJira(xssfWorkbook);
-			setGoogleDoc(xssfWorkbook);
-			setIA(xssfWorkbook);
+			itemCount = setGoogleDoc(xssfWorkbook,itemCount);
+System.out.println("GoogleDoc Done !");
+
+			itemCount = setIA(xssfWorkbook, 2,itemCount);
+System.out.println("IA Done !");
+			
+			if(xssfWorkbook.getNumberOfSheets() > 3) {
+				itemCount = setIA(xssfWorkbook, 3,itemCount);
+System.out.println("IA2 Done !");
+			}
 
 			output = new FileOutputStream(f);
 			xssfWorkbook.write(output);
@@ -148,10 +151,11 @@ public class MaintainList {
 				System.out.println("Error:" + e.getMessage());
 			}
 		}
-		System.out.println("Done!");
+		
+		System.out.println("Total Item : " + itemCount);
 	}
 
-	private static void setJira(XSSFWorkbook xssfWorkbook) throws Exception {
+	private static int setJira(XSSFWorkbook xssfWorkbook, int itemCount) throws Exception {
 
 		List<List<String>> listRow = new LinkedList<List<String>>();
 		XSSFSheet sheet = xssfWorkbook.getSheetAt(0);
@@ -159,7 +163,7 @@ public class MaintainList {
 		// 取得對應Job的Row位置(橫列)
 		for (Row row : sheet) {
 			if (row.getRowNum() > 3 && row.getCell(0) != null && row.getRowNum() < sheet.getLastRowNum()) {
-
+				itemCount++;
 				setVarInit();
 
 				for (int c = 0; c < row.getLastCellNum(); c++) {
@@ -252,9 +256,11 @@ public class MaintainList {
 					.setCellValue(listToolsModule.contains(dataCell.get(2).toUpperCase()) ? "N" : "Y");
 			setCellStyle(row, colnum++, style, dfNormal).setCellValue(validResult);
 		}
+		
+		return itemCount;
 	}
 
-	private static void setGoogleDoc(XSSFWorkbook xssfWorkbook) throws Exception {
+	private static int setGoogleDoc(XSSFWorkbook xssfWorkbook, int itemCount) throws Exception {
 
 		List<List<String>> listRow = new LinkedList<List<String>>();
 		XSSFSheet sheet = xssfWorkbook.getSheetAt(1);
@@ -262,6 +268,7 @@ public class MaintainList {
 		// 取得對應Job的Row位置(橫列)
 		for (Row row : sheet) {
 			if (row.getRowNum() > 0 && row.getCell(0) != null) {
+				itemCount++;
 
 				setVarInit();
 
@@ -349,23 +356,25 @@ public class MaintainList {
 			}
 
 			setCellStyle(row, colnum++, style, dfNormal)
-					.setCellValue(listToolsModule.contains(dataCell.get(2).toUpperCase()) ? "N" : "Y");
+					.setCellValue(listToolsModule.contains(dataCell.get(14).toUpperCase()) ? "N" : "Y");
 			setCellStyle(row, colnum++, style, dfNormal).setCellValue(validResult);
 
 		}
+		
+		return itemCount;
 	}
 
-	private static void setIA(XSSFWorkbook xssfWorkbook) throws Exception {
+	private static int setIA(XSSFWorkbook xssfWorkbook, int sheetNum, int itemCount) throws Exception {
 
 		List<List<String>> listRow = new LinkedList<List<String>>();
-		XSSFSheet sheet = xssfWorkbook.getSheetAt(2);
+		XSSFSheet sheet = xssfWorkbook.getSheetAt(sheetNum);
 
 		// 取得對應Job的Row位置(橫列)
 		for (Row row : sheet) {
 			if (row.getRowNum() > 0 && row.getCell(0) != null) {
-
+				itemCount++;
 				setVarInit();
-
+//System.out.println(row.getRowNum());
 				for (int c = 0; c < row.getLastCellNum(); c++) {
 					if (row.getCell(c) != null && row.getCell(c).toString().length() > 0) {
 						if (c == 1 || c == 2) {
@@ -386,6 +395,7 @@ public class MaintainList {
 							listCell.add(row.getCell(c).toString());
 					} else
 						listCell.add("");
+
 				}
 
 				listCell.add(getValidResult(acceptDate, replyDate, dueDate, actDate,
@@ -394,7 +404,7 @@ public class MaintainList {
 			}
 		}
 
-		sheet = xssfWorkbook.createSheet("IA " + sdfMM.format(new Date()));
+		sheet = xssfWorkbook.createSheet("IA"+ sheetNum + " " + sdfMM.format(new Date()));
 		int rownum = 0, colnum = 0;
 
 		row = sheet.createRow(rownum++);
@@ -410,7 +420,7 @@ public class MaintainList {
 					: validResultArr[0];
 			style = "ERR".equals(styleType) ? errStyle : normalStyle;
 
-			setCellStyle(row, colnum++, style, dfNormal).setCellFormula(dataCell.get(0));
+			setCellStyle(row, colnum++, style, dfNormal).setCellFormula("ROW()-5");
 			setCellStyle(row, colnum++, style, dfDateTime).setCellValue(dataCell.get(1));
 			setCellStyle(row, colnum++, style, dfDateTime).setCellValue(dataCell.get(2));
 			setCellStyle(row, colnum++, style, dfNormal)
@@ -425,9 +435,10 @@ public class MaintainList {
 			setCellStyle(row, colnum++, style, dfDate).setCellValue(dataCell.get(10));
 
 			if (validResultArr.length > 1) {
-				for (int i = 0; i < 5; i++)
+				for (int i = 0; i < 4; i++)
 					setCellStyle(row, colnum++, style, dfNormal).setCellValue("");
 
+				setCellStyle(row, colnum++, style, dfNormal).setCellValue(dataCell.get(15));
 				setCellStyle(row, colnum++, style, dfDecimal).setCellValue(0.0f);
 				setCellStyle(row, colnum++, style, dfDecimal).setCellValue(0.0f);
 			} else {
@@ -445,9 +456,11 @@ public class MaintainList {
 			}
 
 			setCellStyle(row, colnum++, style, dfNormal)
-					.setCellValue(listToolsModule.contains(dataCell.get(18).toUpperCase()) ? "N" : "Y");
+					.setCellValue(listToolsModule.contains(dataCell.get(5).toUpperCase()) ? "N" : "Y");
 			setCellStyle(row, colnum++, style, dfNormal).setCellValue(validResult);
 		}
+		
+		return itemCount;
 	}
 
 	/**
