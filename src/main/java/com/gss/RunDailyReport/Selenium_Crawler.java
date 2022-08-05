@@ -22,6 +22,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.gss.Property;
@@ -113,7 +114,7 @@ public class Selenium_Crawler {
 						System.out.println(em.getText());
 						// 失敗的job需下載附件
 						download = str.contains("失敗");
-						em.click();
+//						em.click();
 						readInbox++;
 						/**
 						 * 因使用原em.click();
@@ -122,7 +123,7 @@ public class Selenium_Crawler {
 						 * (即使是透過舊版chrome driver開啟也一樣會被自動更新為新版)
 						 * 故改用Actions取代
 						 */
-//						new Actions(driver).moveToElement(em).click().perform();
+						new Actions(driver).moveToElement(em).click().perform();
 						break;
 					}
 				}
