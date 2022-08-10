@@ -562,6 +562,7 @@ System.out.println("IA2 Done !");
 		String validResult = "";
 		/**
 		 * 驗證內容是否有誤
+		 * 回應時間 - 受理時間 需大於等於 1
 		 * 受理時間 & 回應時間 & 到期日不可為空
 		 * 受理時間 & 回應時間 需根據問題類型去判斷
 		 * 到期日不可早於實際完成日
@@ -579,6 +580,8 @@ System.out.println("IA2 Done !");
 					|| (listIssueType2.contains(issueType) && diffrence / 60f > 4)
 					|| (listIssueType3.contains(issueType) && diffrence / 60f / 24f > 3 + holiday - isAM)) {
 				validResult = "ERR-受理時間 & 回應時間 需根據問題類型去判斷";
+			} else if (diffrence <= 0) {
+				validResult = "ERR-回應時間 - 受理時間 需大於等於 1";
 			} else if (actDate != null) {
 				diffrence = time.convert(actDate.getTime() - dueDate.getTime(), TimeUnit.MILLISECONDS);
 				if (diffrence / 60f / 24f > 1) {
@@ -588,6 +591,7 @@ System.out.println("IA2 Done !");
 			}else
 				validResult = "Normal";
 		}
+
 
 		// 已人工確認過無誤
 		if ("V".equals(manualChk))
