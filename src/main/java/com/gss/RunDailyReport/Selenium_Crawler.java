@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import org.jsoup.helper.StringUtil;
 import org.openqa.selenium.By;
@@ -49,7 +48,7 @@ public class Selenium_Crawler {
 		Map<String, String> qcLog;
 		File zipFile;
 		boolean download = false;
-		String body = "", title = "", jobRSDate = "", job_id = "", job_seq = "", unZipFile = "";
+		String body = "", title = "", jobRSDate = "", jobRSTime = "", jobTitle = "", job_id = "", job_seq = "", unZipFile = "";
 		String[] jobMailTitleArr;
 		int arrLen = 0;
 
@@ -167,6 +166,8 @@ public class Selenium_Crawler {
 						arrLen = jobMailTitleArr.length;
 						// job 所屬日期 (日誌用)
 						jobRSDate = jobMailTitleArr[arrLen - 2].trim();
+						jobRSTime = jobMailTitleArr[arrLen - 1].trim();
+						jobTitle = jobMailTitleArr[3].trim();
 						job_seq = body.substring(body.indexOf("〔(") + 2);
 						job_seq = job_seq.substring(0, job_seq.indexOf(")p_"));
 						job_id = body.substring(body.indexOf(")p_") + 1);
@@ -178,7 +179,9 @@ public class Selenium_Crawler {
 						 * 2. 此mail的內容為job執行結果的mail
 						 * 3. 收信時間在欲檢查的時間內
 						 */
-						if (download && body.indexOf(mailStartText) == 0 && isDownloadFile(jobRSDate, chkDateYesterdayInt)) {
+						if (download && body.indexOf(mailStartText) == 0
+								&& isDownloadFile(jobRSDate, jobRSTime, chkDateYesterdayInt)
+								&& jobTitle.startsWith("執行失敗")) {
 
 							em.click();
 							Thread.sleep(1000);
@@ -243,10 +246,11 @@ public class Selenium_Crawler {
 	 * @param chkDate
 	 * @return
 	 */
-	private static boolean isDownloadFile(String jobRSDate, Integer chkDate) {
+	private static boolean isDownloadFile(String jobRSDate, String jobRSTime, Integer chkDate) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		String yy1 = "20"; // 西元年前兩碼
-
+		boolean result = false;
+		
 		// 取 昨、今 兩天的日期
 		Calendar cal = Calendar.getInstance();
 		String today = sdf.format(cal.getTime());
@@ -262,7 +266,18 @@ public class Selenium_Crawler {
 			String dd = jobRSDateArr[2].substring(0, jobRSDateArr[2].length() - 1);
 			jobRSOriDate = yy1 + yy2 + Tools.setLen(mm, 2) + Tools.setLen(dd, 2);
 		}
-		return Integer.valueOf(jobRSOriDate) >= chkDate;
+		
+		int jobRSTimeHH = Integer.parseInt(jobRSTime.substring(2,jobRSTime.lastIndexOf(":")));
+		int jobRSOriDateInt = Integer.valueOf(jobRSOriDate);
+		if (jobRSOriDateInt > chkDate) 
+			result = true;
+		else if (jobRSOriDateInt == chkDate) {
+			if (jobRSTime.contains("下午"))
+				result = true;
+			else if (jobRSTimeHH >= 9)
+				result = true;
+		}
+		return result;
 	}
 
 	/**
