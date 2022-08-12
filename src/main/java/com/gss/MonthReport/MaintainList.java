@@ -9,12 +9,10 @@ import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -69,12 +67,12 @@ public class MaintainList {
 	private static Date acceptDate, replyDate, dueDate, actDate, date;
 	private static String issueType, validResult, styleType;
 	private static String[] validResultArr;
-	private static long diffrence;
-	private static final TimeUnit time = TimeUnit.MINUTES;
-	private static final List<String> listIssueType1 = Arrays.asList(new String[] { "010" });
-	private static final List<String> listIssueType2 = Arrays.asList(new String[] { "011", "012" });
-	private static final List<String> listIssueType3 = Arrays
-			.asList(new String[] { "013", "014", "015", "018", "019" });
+//	private static long diffrence;
+//	private static final TimeUnit time = TimeUnit.MINUTES;
+//	private static final List<String> listIssueType1 = Arrays.asList(new String[] { "010" });
+//	private static final List<String> listIssueType2 = Arrays.asList(new String[] { "011", "012" });
+//	private static final List<String> listIssueType3 = Arrays
+//			.asList(new String[] { "013", "014", "015", "018", "019" });
 	private static final List<String> listToolsModule = Arrays
 			.asList(new String[] { "SAFENET", "DATASTAGE", "HADOOP", "WEBFOCUS", "IA" });
 	private static List<String> listCell;
@@ -191,7 +189,7 @@ System.out.println("IA2 Done !");
 						listCell.add("");
 				}
 
-				listCell.add(getValidResult(acceptDate, replyDate, dueDate, actDate,
+				listCell.add(MonthReportTools.getValidResult(acceptDate, replyDate, dueDate, actDate, issueType,
 						listCell.get(listCell.size() - 1).toUpperCase()));
 				listRow.add(listCell);
 			}
@@ -300,8 +298,8 @@ System.out.println("IA2 Done !");
 					} else
 						listCell.add("");
 				}
-
-				listCell.add(getValidResult(acceptDate, replyDate, dueDate, actDate,
+				
+				listCell.add(MonthReportTools.getValidResult(acceptDate, replyDate, dueDate, actDate, issueType,
 						listCell.get(listCell.size() - 1).toUpperCase()));
 				listRow.add(listCell);
 			}
@@ -384,6 +382,9 @@ System.out.println("IA2 Done !");
 								acceptDate = date;
 							if (c == 2)
 								replyDate = date;
+						} else if (c == 7) {
+							issueType = row.getCell(c).toString();
+							listCell.add(issueType);
 						} else if (c == 9 || c == 10) {
 							date = row.getCell(c).getDateCellValue();
 							listCell.add(sdfDate.format(date));
@@ -397,8 +398,8 @@ System.out.println("IA2 Done !");
 						listCell.add("");
 
 				}
-
-				listCell.add(getValidResult(acceptDate, replyDate, dueDate, actDate,
+				
+				listCell.add(MonthReportTools.getValidResult(acceptDate, replyDate, dueDate, actDate, issueType,
 						listCell.get(listCell.size() - 1).toUpperCase()));
 				listRow.add(listCell);
 			}
@@ -546,89 +547,89 @@ System.out.println("IA2 Done !");
 			setCellStyle(row, colnum++, style, dfNormal).setCellValue(str);
 	}
 
-	/**
-	 * 驗証結果
-	 * 
-	 * @param acceptDate
-	 * @param replyDate
-	 * @param dueDate
-	 * @param actDate
-	 * @param manualChk
-	 * @return
-	 */
-	@SuppressWarnings("deprecation")
-	private static String getValidResult(Date acceptDate, Date replyDate, Date dueDate, Date actDate,
-			String manualChk) {
-		String validResult = "";
-		/**
-		 * 驗證內容是否有誤
-		 * 回應時間 - 受理時間 需大於等於 1
-		 * 受理時間 & 回應時間 & 到期日不可為空
-		 * 受理時間 & 回應時間 需根據問題類型去判斷
-		 * 到期日不可早於實際完成日
-		 * 實際完成日為空或為未來日期則後面的資訊皆為清空，除了時數為0.0 (notFinish)
-		 */
-		if (replyDate == null || dueDate == null || acceptDate == null) {
-			validResult = "ERR-受理時間 & 回應時間 & 到期日不可為空";
-		} else {
-			// 受理時間 與 回應時間 之間是否含有週休二日
-			int holiday = getHoliday(acceptDate, replyDate);
-			// 受理時間為中午前則當天需算1個工作天
-			int isAM = acceptDate.getHours() < 12 ? 1 : 0;
-			diffrence = time.convert(replyDate.getTime() - acceptDate.getTime(), TimeUnit.MILLISECONDS);
-			if ((listIssueType1.contains(issueType) && diffrence / 60f / 24f > 2 + holiday - isAM)
-					|| (listIssueType2.contains(issueType) && diffrence / 60f > 4)
-					|| (listIssueType3.contains(issueType) && diffrence / 60f / 24f > 3 + holiday - isAM)) {
-				validResult = "ERR-受理時間 & 回應時間 需根據問題類型去判斷";
-			} else if (diffrence <= 0) {
-				validResult = "ERR-回應時間 - 受理時間 需大於等於 1";
-			} else if (actDate != null) {
-				diffrence = time.convert(actDate.getTime() - dueDate.getTime(), TimeUnit.MILLISECONDS);
-				if (diffrence / 60f / 24f > 1) {
-					validResult = "ERR-到期日不可早於實際完成日";
-				} else
-					validResult = "Normal";
-			}else
-				validResult = "Normal";
-		}
-
-
-		// 已人工確認過無誤
-		if ("V".equals(manualChk))
-			validResult = "manualChk";
-		if (actDate == null || (actDate != null && isFutureDate(actDate)))
-			validResult += ",notFinish";
-
-		return validResult;
-	}
-
-	/**
-	 * 判斷受理日與回應日之間有無假日
-	 * 
-	 * @param acceptDate
-	 * @param replyDate
-	 * @return
-	 */
-	private static int getHoliday(Date acceptDate, Date replyDate) {
-		Calendar c = Calendar.getInstance();
-		c.setTime(acceptDate);
-		int acceptDateOfWeek = c.get(Calendar.DAY_OF_WEEK);
-		c.setTime(replyDate);
-		int replyDateOfWeek = c.get(Calendar.DAY_OF_WEEK);
-		return acceptDateOfWeek > replyDateOfWeek ? 2 : 0;
-	}
-
-	/**
-	 * 是否為未來日期
-	 * 
-	 * @param actDate
-	 * @return
-	 */
-	private static boolean isFutureDate(Date actDate) {
-		Calendar c = Calendar.getInstance();
-		c.setTime(actDate);
-		if (c.get(Calendar.MONTH) >= Calendar.getInstance().get(Calendar.MONTH))
-			return true;
-		return false;
-	}
+//	/**
+//	 * 驗証結果
+//	 * 
+//	 * @param acceptDate
+//	 * @param replyDate
+//	 * @param dueDate
+//	 * @param actDate
+//	 * @param manualChk
+//	 * @return
+//	 */
+//	@SuppressWarnings("deprecation")
+//	private static String getValidResult(Date acceptDate, Date replyDate, Date dueDate, Date actDate,
+//			String manualChk) {
+//		String validResult = "";
+//		/**
+//		 * 驗證內容是否有誤
+//		 * 回應時間 - 受理時間 需大於等於 1
+//		 * 受理時間 & 回應時間 & 到期日不可為空
+//		 * 受理時間 & 回應時間 需根據問題類型去判斷
+//		 * 到期日不可早於實際完成日
+//		 * 實際完成日為空或為未來日期則後面的資訊皆為清空，除了時數為0.0 (notFinish)
+//		 */
+//		if (replyDate == null || dueDate == null || acceptDate == null) {
+//			validResult = "ERR-受理時間 & 回應時間 & 到期日不可為空";
+//		} else {
+//			// 受理時間 與 回應時間 之間是否含有週休二日
+//			int holiday = getHoliday(acceptDate, replyDate);
+//			// 受理時間為中午前則當天需算1個工作天
+//			int isAM = acceptDate.getHours() < 12 ? 1 : 0;
+//			diffrence = time.convert(replyDate.getTime() - acceptDate.getTime(), TimeUnit.MILLISECONDS);
+//			if ((listIssueType1.contains(issueType) && diffrence / 60f / 24f > 2 + holiday - isAM)
+//					|| (listIssueType2.contains(issueType) && diffrence / 60f > 4)
+//					|| (listIssueType3.contains(issueType) && diffrence / 60f / 24f > 3 + holiday - isAM)) {
+//				validResult = "ERR-受理時間 & 回應時間 需根據問題類型去判斷";
+//			} else if (diffrence <= 0) {
+//				validResult = "ERR-回應時間 - 受理時間 需大於等於 1";
+//			} else if (actDate != null) {
+//				diffrence = time.convert(actDate.getTime() - dueDate.getTime(), TimeUnit.MILLISECONDS);
+//				if (diffrence / 60f / 24f > 1) {
+//					validResult = "ERR-到期日不可早於實際完成日";
+//				} else
+//					validResult = "Normal";
+//			}else
+//				validResult = "Normal";
+//		}
+//
+//
+//		// 已人工確認過無誤
+//		if ("V".equals(manualChk))
+//			validResult = "manualChk";
+//		if (actDate == null || (actDate != null && isFutureDate(actDate)))
+//			validResult += ",notFinish";
+//
+//		return validResult;
+//	}
+//
+//	/**
+//	 * 判斷受理日與回應日之間有無假日
+//	 * 
+//	 * @param acceptDate
+//	 * @param replyDate
+//	 * @return
+//	 */
+//	private static int getHoliday(Date acceptDate, Date replyDate) {
+//		Calendar c = Calendar.getInstance();
+//		c.setTime(acceptDate);
+//		int acceptDateOfWeek = c.get(Calendar.DAY_OF_WEEK);
+//		c.setTime(replyDate);
+//		int replyDateOfWeek = c.get(Calendar.DAY_OF_WEEK);
+//		return acceptDateOfWeek > replyDateOfWeek ? 2 : 0;
+//	}
+//
+//	/**
+//	 * 是否為未來日期
+//	 * 
+//	 * @param actDate
+//	 * @return
+//	 */
+//	private static boolean isFutureDate(Date actDate) {
+//		Calendar c = Calendar.getInstance();
+//		c.setTime(actDate);
+//		if (c.get(Calendar.MONTH) >= Calendar.getInstance().get(Calendar.MONTH))
+//			return true;
+//		return false;
+//	}
 }
