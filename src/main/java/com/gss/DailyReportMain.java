@@ -48,7 +48,7 @@ public class DailyReportMain {
 			// 執行類別
 			String runType = mapProp.get("runType");
 			System.out.println("執行類別: " + runType);
-
+			
 			if (runType.equals("check")) {
 				ChkDailyReport.chkDailyReport(path); // 檢查日誌
 			} else if (runType.equals("maintain")) {
