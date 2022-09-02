@@ -3,6 +3,7 @@ package com.gss;
 import java.io.File;
 import java.util.Date;
 import java.util.Map;
+import java.util.Scanner;
 
 import com.gss.ChkDailyReport.ChkDailyReport;
 import com.gss.MonthReport.MaintainList;
@@ -38,23 +39,54 @@ public class DailyReportMain {
 			System.out.println("path: " + path);
 			Map<String, String> mapProp = Property.getProperties(path);
 
-			// 月報放置路徑與檔名
-			String monthReportPath = mapProp.get("MonthReportPath");
-			String maintainListExcel = path + monthReportPath+mapProp.get("MaintainListExcel"); // Jar
-			String monthReportExcel = path + monthReportPath+mapProp.get("MonthReportExcel"); // Jar
-			System.out.println("維護問題紀錄單Excel: " + maintainListExcel);
-			System.out.println("月報Excel: " + monthReportExcel);
-			
 			// 執行類別
 			String runType = mapProp.get("runType");
 			System.out.println("執行類別: " + runType);
+
+			// 月報放置路徑與檔名
+			String monthReportPath = "", maintainListExcel = "", monthReportExcel = "";
+			int lastMonthTotalFinishNum = 0, lastMonthTotalCodeNum = 0, lastMonth = 0;
+			
+			if (runType.equals("month")) { // 驗証月報內容
+
+				if (!isStartupFromJar) {// IDE
+					lastMonthTotalFinishNum = 228;
+					lastMonthTotalCodeNum = 178;
+					lastMonth = 202208;
+				}
+				
+				/**
+				 * 透過windows的cmd執行時需將System.in格式轉為big5才不會讓中文變亂碼
+				 * 即使在cmd下chcp 65001轉成utf-8也沒用
+				 * 但在eclipse執行時不能轉為big5
+				 */
+				try (Scanner s =  isStartupFromJar ? new Scanner(System.in, "big5") : new Scanner(System.in)) {
+					System.out.println("請輸入 月報月份(yyyymm): ");
+					lastMonth = lastMonth == 0 ? s.nextInt() : lastMonth;
+					System.out.println("請輸入 上月累計已完成件數: ");
+					lastMonthTotalFinishNum = lastMonthTotalFinishNum == 0 ? s.nextInt() : lastMonthTotalFinishNum;
+					System.out.println("請輸入 上月累計程式支數: ");
+					lastMonthTotalCodeNum = lastMonthTotalCodeNum == 0 ? s.nextInt() : lastMonthTotalCodeNum;
+				}
+				
+				// 月報放置路徑與檔名
+				monthReportPath = mapProp.get("MonthReportPath") + lastMonth + "/";
+				maintainListExcel = path + monthReportPath + mapProp.get("MaintainListExcel") + lastMonth + ".xlsx";
+				monthReportExcel = path + monthReportPath + mapProp.get("MonthReportExcel") + (lastMonth-191100) + ".xlsx";
+				System.out.println("維護問題紀錄單Excel: " + maintainListExcel);
+				System.out.println("月報Excel: " + monthReportExcel);
+				
+			}
 			
 			if (runType.equals("check")) {
 				ChkDailyReport.chkDailyReport(path); // 檢查日誌
+				
 			} else if (runType.equals("maintain")) {
 				MaintainList.maintainList(maintainListExcel); // 整理維護問題紀錄單Excel
-			} else if (runType.equals("month")) {
-				MonthReport.monthReport(monthReportExcel); // 整理月報
+				
+			} else if (runType.equals("month")) { // 驗証月報內容
+				MonthReport.monthReport(monthReportExcel, lastMonthTotalFinishNum, lastMonthTotalCodeNum); // 驗証月報
+				
 			} else if (runType.equals("run")){
 				/**
 				 * 整理日誌
@@ -73,6 +105,7 @@ public class DailyReportMain {
 							done = true;
 					}
 				} while (!done);
+				
 			} else {
 				System.out.println("runType Error");
 			}

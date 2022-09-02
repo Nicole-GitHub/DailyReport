@@ -30,8 +30,7 @@ public class MonthReportTools {
 	 * @return
 	 */
 	@SuppressWarnings("deprecation")
-	protected static String getValidResult(Date acceptDate, Date replyDate, Date dueDate, Date actDate,
-			String issueType, String manualChk) {
+	protected static String getValidResult(Date acceptDate, Date replyDate, Date dueDate, Date actDate,	String issueType) {
 		String validResult = "";
 		/**
 		 * 驗證內容是否有誤
@@ -57,7 +56,7 @@ public class MonthReportTools {
 				validResult = "ERR-回應時間 - 受理時間 需大於等於 1";
 			} else if (actDate != null) {
 				diffrence = time.convert(actDate.getTime() - dueDate.getTime(), TimeUnit.MILLISECONDS);
-				if (diffrence / 60f / 24f > 1) {
+				if (diffrence / 60f / 24f >= 1) {
 					validResult = "ERR-到期日不可早於實際完成日";
 				} else
 					validResult = "Normal";
@@ -65,10 +64,6 @@ public class MonthReportTools {
 				validResult = "Normal";
 		}
 
-
-		// 已人工確認過無誤
-		if ("V".equals(manualChk))
-			validResult = "manualChk";
 		if (actDate == null || (actDate != null && isFutureDate(actDate)))
 			validResult += ",notFinish";
 
@@ -113,14 +108,25 @@ public class MonthReportTools {
 	 */
 	protected static boolean isPastDate(Date acceptDate) {
 		Calendar initReportDate = Calendar.getInstance();
-		initReportDate.add(Calendar.MONTH, -1);
+		initReportDate.add(Calendar.MONTH, -2);
 		Calendar c = Calendar.getInstance();
 		c.setTime(acceptDate);
-System.out.println("c:"+c.get(Calendar.YEAR)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.DATE));
-System.out.println("initReportDate:"+initReportDate.get(Calendar.YEAR)+"/"+(initReportDate.get(Calendar.MONTH)+1)+"/"+initReportDate.get(Calendar.DATE));
+//System.out.println("c:"+c.get(Calendar.YEAR)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.DATE));
+//System.out.println("initReportDate:"+initReportDate.get(Calendar.YEAR)+"/"+(initReportDate.get(Calendar.MONTH)+1)+"/"+initReportDate.get(Calendar.DATE));
 		if (c.get(Calendar.MONTH) < initReportDate.get(Calendar.MONTH))
 			return true;
 		return false;
+	}
+	
+	/**
+	 * 取得系統月份 - 1
+	 * 
+	 * @param actDate
+	 * @return
+	 */
+	protected static int getLastMonth() {
+		Calendar c = Calendar.getInstance();
+		return c.get(Calendar.MONTH);
 	}
 
 	/**
