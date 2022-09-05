@@ -267,9 +267,9 @@ System.out.println("IA2 Done !");
 		for (Row row : sheet) {
 			if (row.getRowNum() > 0 && row.getCell(0) != null) {
 				itemCount++;
-
 				setVarInit();
 
+//System.out.println("row.getRowNum():"+row.getRowNum() );
 				for (int c = 0; c < row.getLastCellNum(); c++) {
 					if (row.getCell(c) != null && row.getCell(c).toString().length() > 0) {
 						if (c == 4 || c == 5) {
@@ -283,8 +283,11 @@ System.out.println("IA2 Done !");
 							listCell.add(
 									String.valueOf(((Double) row.getCell(c).getNumericCellValue()).intValue()));
 						} else if (c == 15) {
-							issueType = Tools.setLen(
-									String.valueOf(((Double) row.getCell(c).getNumericCellValue()).intValue()), 3);
+							if (row.getCell(c).getCellType() == Cell.CELL_TYPE_STRING)
+								issueType = Tools.setLen(row.getCell(c).getStringCellValue(), 3);
+							else if (row.getCell(c).getCellType() == Cell.CELL_TYPE_NUMERIC)
+								issueType = Tools.setLen(
+										String.valueOf(((Double) row.getCell(c).getNumericCellValue()).intValue()), 3);
 							listCell.add(issueType);
 						} else if (c == 6 || c == 7) {
 							date = row.getCell(c).getDateCellValue();
@@ -375,7 +378,12 @@ System.out.println("IA2 Done !");
 				for (int c = 0; c < row.getLastCellNum(); c++) {
 					if (row.getCell(c) != null && row.getCell(c).toString().length() > 0) {
 						if (c == 1 || c == 2) {
-							date = row.getCell(c).getDateCellValue();
+							if (row.getCell(c).getCellType() == Cell.CELL_TYPE_STRING) {
+								date = new SimpleDateFormat("yyyy/MM/dd HH:mm")
+										.parse(row.getCell(c).getStringCellValue());
+							} else if (row.getCell(c).getCellType() == Cell.CELL_TYPE_NUMERIC)
+								date = row.getCell(c).getDateCellValue();
+							
 							listCell.add(sdfDateTime.format(date));
 							if (c == 1)
 								acceptDate = date;
@@ -385,7 +393,13 @@ System.out.println("IA2 Done !");
 							issueType = row.getCell(c).toString();
 							listCell.add(issueType);
 						} else if (c == 9 || c == 10) {
-							date = row.getCell(c).getDateCellValue();
+
+							if (row.getCell(c).getCellType() == Cell.CELL_TYPE_STRING) {
+								date = new SimpleDateFormat("yyyy/MM/dd")
+										.parse(row.getCell(c).getStringCellValue());
+							} else if (row.getCell(c).getCellType() == Cell.CELL_TYPE_NUMERIC)
+								date = row.getCell(c).getDateCellValue();
+							
 							listCell.add(sdfDate.format(date));
 							if (c == 9)
 								dueDate = date;

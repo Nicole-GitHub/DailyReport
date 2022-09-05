@@ -62,7 +62,8 @@ public class MonthReport {
 			InputStream inputStream = new FileInputStream(f);
 			// XSSF (.xlsx)
 			xssfWorkbook = new XSSFWorkbook(inputStream);
-			
+			System.out.println("\r\n================== 驗證開始 ==================\r\n");
+
 			Map<String, Float> maintainRS = chkMaintainList("系統維護問題紀錄表", xssfWorkbook.getSheetAt(2), lastMonthTotalFinishNum, lastMonthTotalCodeNum);
 			chkSummaryList("彙總表", xssfWorkbook.getSheetAt(0), maintainRS);
 			chkSummaryMonthList("月統計", xssfWorkbook.getSheetAt(1), maintainRS);
@@ -85,17 +86,11 @@ public class MonthReport {
 
 	private static void chkPIVOT(String sheetName, Sheet sheet, Map<String, Float> maintainRS) throws Exception {
 		
-		if(sheet.getRow(6).getCell(1).getNumericCellValue() != (Double.parseDouble(maintainRS.get("appCountFinish").toString()) + Double.parseDouble(maintainRS.get("appCountNotFinish").toString()))) throw new Exception(sheetName + " Y 計數 - 紀錄單號 數值錯誤!");
-		if(sheet.getRow(6).getCell(2).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountCodeNum").toString())) throw new Exception(sheetName + " Y 加總 - 程式支數 數值錯誤!");
-		if(sheet.getRow(6).getCell(3).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountDocNum").toString())) throw new Exception(sheetName + " Y 加總 - 文件數 數值錯誤!");
-		if(sheet.getRow(6).getCell(4).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountSA").toString())) throw new Exception(sheetName + " Y 加總 - 系統分析人時 數值錯誤!");
-		if(sheet.getRow(6).getCell(5).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountPG").toString())) throw new Exception(sheetName + " Y 加總 - 程式設計人時 數值錯誤!");
-
-		if(sheet.getRow(13).getCell(1).getNumericCellValue() != (Double.parseDouble(maintainRS.get("appCountFinish").toString()) + Double.parseDouble(maintainRS.get("appCountNotFinish").toString()))) throw new Exception(sheetName + " 總計 計數 - 紀錄單號 數值錯誤!");
-		if(sheet.getRow(13).getCell(2).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountCodeNum").toString())) throw new Exception(sheetName + " 總計 加總 - 程式支數 數值錯誤!");
-		if(sheet.getRow(13).getCell(3).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountDocNum").toString())) throw new Exception(sheetName + " 總計 加總 - 文件數 數值錯誤!");
-		if(sheet.getRow(13).getCell(4).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountSA").toString())) throw new Exception(sheetName + " 總計 加總 - 系統分析人時 數值錯誤!");
-		if(sheet.getRow(13).getCell(5).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountPG").toString())) throw new Exception(sheetName + " 總計 加總 - 程式設計人時 數值錯誤!");
+		if(sheet.getRow(6).getCell(1).getNumericCellValue() != (Double.parseDouble(maintainRS.get("appCountFinish").toString()) + Double.parseDouble(maintainRS.get("appCountNotFinish").toString()))) System.out.println("ERR: " + sheetName + " Y 計數 - 紀錄單號 數值錯誤!");
+		if(sheet.getRow(6).getCell(2).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountCodeNum").toString())) System.out.println("ERR: " + sheetName + " Y 加總 - 程式支數 數值錯誤!");
+		if(sheet.getRow(6).getCell(3).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountDocNum").toString())) System.out.println("ERR: " + sheetName + " Y 加總 - 文件數 數值錯誤!");
+		if(sheet.getRow(6).getCell(4).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountSA").toString())) System.out.println("ERR: " + sheetName + " Y 加總 - 系統分析人時 數值錯誤!");
+		if(sheet.getRow(6).getCell(5).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountPG").toString())) System.out.println("ERR: " + sheetName + " Y 加總 - 程式設計人時 數值錯誤!");
 	}
 	
 	private static void chkSummaryMonthList(String sheetName, Sheet sheet, Map<String, Float> maintainRS) throws Exception {
@@ -103,24 +98,24 @@ public class MonthReport {
 		int rowNum = lastMonth + 4;
 		
 		// 驗證上半部細項數值
-		if(sheet.getRow(rowNum).getCell(1).getNumericCellValue() != (sheet.getRow(rowNum).getCell(3).getNumericCellValue() + sheet.getRow(rowNum).getCell(4).getNumericCellValue())) throw new Exception(sheetName + " 服務次數 數值錯誤!");
-		if(sheet.getRow(rowNum).getCell(2).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountAccept").toString())) throw new Exception(sheetName + " 受理件數 數值錯誤!");
-		if(sheet.getRow(rowNum).getCell(3).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountFinish").toString())) throw new Exception(sheetName + " 完成件數 數值錯誤!");
-		if(sheet.getRow(rowNum).getCell(4).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountNotFinish").toString())) throw new Exception(sheetName + " 未完成件數 數值錯誤!");
-		if(sheet.getRow(rowNum).getCell(9).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountCodeNum").toString())) throw new Exception(sheetName + " 程式支數 數值錯誤!");
-		if(sheet.getRow(rowNum).getCell(10).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountDocNum").toString())) throw new Exception(sheetName + " 文件數 數值錯誤!");
-		if(sheet.getRow(rowNum).getCell(11).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountSA").toString())) throw new Exception(sheetName + " 系統分析人時 數值錯誤!");
-		if(sheet.getRow(rowNum).getCell(12).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountPG").toString())) throw new Exception(sheetName + " 程式設計人時 數值錯誤!");
+		if(sheet.getRow(rowNum).getCell(1).getNumericCellValue() != (sheet.getRow(rowNum).getCell(3).getNumericCellValue() + sheet.getRow(rowNum).getCell(4).getNumericCellValue())) System.out.println("ERR: " + sheetName + " 服務次數 數值錯誤!");
+		if(sheet.getRow(rowNum).getCell(2).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountAccept").toString())) System.out.println("ERR: " + sheetName + " 受理件數 數值錯誤!");
+		if(sheet.getRow(rowNum).getCell(3).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountFinish").toString())) System.out.println("ERR: " + sheetName + " 完成件數 數值錯誤!");
+		if(sheet.getRow(rowNum).getCell(4).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountNotFinish").toString())) System.out.println("ERR: " + sheetName + " 未完成件數 數值錯誤!");
+		if(sheet.getRow(rowNum).getCell(9).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountCodeNum").toString())) System.out.println("ERR: " + sheetName + " 程式支數 數值錯誤!");
+		if(sheet.getRow(rowNum).getCell(10).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountDocNum").toString())) System.out.println("ERR: " + sheetName + " 文件數 數值錯誤!");
+		if(sheet.getRow(rowNum).getCell(11).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountSA").toString())) System.out.println("ERR: " + sheetName + " 系統分析人時 數值錯誤!");
+		if(sheet.getRow(rowNum).getCell(12).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountPG").toString())) System.out.println("ERR: " + sheetName + " 程式設計人時 數值錯誤!");
 
 		// 驗證下半部數值
-		if(sheet.getRow(18).getCell(11).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountSA").toString())) throw new Exception(sheetName + " 系統分析人時 已使用時數 (A) 數值錯誤!");
-		if(sheet.getRow(18).getCell(12).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountPG").toString())) throw new Exception(sheetName + " 程式設計人時 已使用時數 (A) 數值錯誤!");
+		if(sheet.getRow(18).getCell(11).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountSA").toString())) System.out.println("ERR: " + sheetName + " 系統分析人時 已使用時數 (A) 數值錯誤!");
+		if(sheet.getRow(18).getCell(12).getNumericCellValue() != Double.parseDouble(maintainRS.get("appCountPG").toString())) System.out.println("ERR: " + sheetName + " 程式設計人時 已使用時數 (A) 數值錯誤!");
 		
 		// 驗證下半部月份
-		if(Integer.parseInt(sheet.getRow(18).getCell(9).getStringCellValue().split("/")[1].split(" ")[0]) != lastMonth) throw new Exception(sheetName + " 已使用時數 (A) 月份 錯誤!");
-		if(Integer.parseInt(sheet.getRow(20).getCell(9).getStringCellValue().split("/")[1].split(" ")[0]) != lastMonth) throw new Exception(sheetName + " 可核銷金額 (A*B) 月份 錯誤!");
-		if(Integer.parseInt(sheet.getRow(21).getCell(9).getStringCellValue().split("/")[1].split(" ")[0]) != lastMonth) throw new Exception(sheetName + " 核銷金額總計 月份 錯誤!");
-		if(Integer.parseInt(sheet.getRow(24).getCell(9).getStringCellValue().split("/")[1].split(" ")[0]) != lastMonth) throw new Exception(sheetName + " 已使用時數 (D) 月份 錯誤!");
+		if(Integer.parseInt(sheet.getRow(18).getCell(9).getStringCellValue().split("/")[1].split(" ")[0]) != lastMonth) System.out.println("ERR: " + sheetName + " 已使用時數 (A) 月份 錯誤!");
+		if(Integer.parseInt(sheet.getRow(20).getCell(9).getStringCellValue().split("/")[1].split(" ")[0]) != lastMonth) System.out.println("ERR: " + sheetName + " 可核銷金額 (A*B) 月份 錯誤!");
+		if(Integer.parseInt(sheet.getRow(21).getCell(9).getStringCellValue().split("/")[1].split(" ")[0]) != lastMonth) System.out.println("ERR: " + sheetName + " 核銷金額總計 月份 錯誤!");
+		if(Integer.parseInt(sheet.getRow(24).getCell(9).getStringCellValue().split("/")[1].split(" ")[0]) != lastMonth) System.out.println("ERR: " + sheetName + " 已使用時數 (D) 月份 錯誤!");
 
 	}
 	
@@ -130,144 +125,144 @@ public class MonthReport {
 		// 驗證彙總表的日期區間
 		String period = sheet.getRow(2).getCell(0).getStringCellValue();
 		String[] periodArr = period.split("/");
-		if(MonthReportTools.getLastMonth() != Integer.parseInt(periodArr[1]) || MonthReportTools.getLastMonth() != Integer.parseInt(periodArr[3])) throw new Exception(sheetName + " 月份錯誤!");
+		if(MonthReportTools.getLastMonth() != Integer.parseInt(periodArr[1]) || MonthReportTools.getLastMonth() != Integer.parseInt(periodArr[3])) System.out.println("ERR: " + sheetName + " 月份錯誤!");
 		
 		// 驗證彙總表的各欄位內容
-		if(Double.parseDouble(maintainRS.get("app010Past").toString()) != sheet.getRow(6).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " app010Past 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app010Accept").toString()) != sheet.getRow(6).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " app010Accept 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app010Finish").toString()) != sheet.getRow(6).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " app010Finish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app010NotFinish").toString()) != sheet.getRow(6).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " app010NotFinish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app010CodeNum").toString()) != sheet.getRow(6).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " app010CodeNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app010DocNum").toString()) != sheet.getRow(6).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " app010DocNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app010SA").toString()) != sheet.getRow(6).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " app010SA 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app010PG").toString()) != sheet.getRow(6).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " app010PG 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app010Past").toString()) != sheet.getRow(6).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app010Past 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app010Accept").toString()) != sheet.getRow(6).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app010Accept 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app010Finish").toString()) != sheet.getRow(6).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app010Finish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app010NotFinish").toString()) != sheet.getRow(6).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app010NotFinish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app010CodeNum").toString()) != sheet.getRow(6).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app010CodeNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app010DocNum").toString()) != sheet.getRow(6).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app010DocNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app010SA").toString()) != sheet.getRow(6).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app010SA 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app010PG").toString()) != sheet.getRow(6).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app010PG 數值錯誤!");
 
-		if(Double.parseDouble(maintainRS.get("app011Past").toString()) != sheet.getRow(8).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " app011Past 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app011Accept").toString()) != sheet.getRow(8).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " app011Accept 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app011Finish").toString()) != sheet.getRow(8).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " app011Finish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app011NotFinish").toString()) != sheet.getRow(8).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " app011NotFinish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app011CodeNum").toString()) != sheet.getRow(8).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " app011CodeNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app011DocNum").toString()) != sheet.getRow(8).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " app011DocNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app011SA").toString()) != sheet.getRow(8).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " app011SA 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app011PG").toString()) != sheet.getRow(8).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " app011PG 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app011Past").toString()) != sheet.getRow(8).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app011Past 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app011Accept").toString()) != sheet.getRow(8).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app011Accept 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app011Finish").toString()) != sheet.getRow(8).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app011Finish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app011NotFinish").toString()) != sheet.getRow(8).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app011NotFinish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app011CodeNum").toString()) != sheet.getRow(8).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app011CodeNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app011DocNum").toString()) != sheet.getRow(8).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app011DocNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app011SA").toString()) != sheet.getRow(8).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app011SA 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app011PG").toString()) != sheet.getRow(8).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app011PG 數值錯誤!");
 
-		if(Double.parseDouble(maintainRS.get("app012Past").toString()) != sheet.getRow(9).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " app012Past 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app012Accept").toString()) != sheet.getRow(9).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " app012Accept 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app012Finish").toString()) != sheet.getRow(9).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " app012Finish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app012NotFinish").toString()) != sheet.getRow(9).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " app012NotFinish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app012CodeNum").toString()) != sheet.getRow(9).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " app012CodeNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app012DocNum").toString()) != sheet.getRow(9).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " app012DocNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app012SA").toString()) != sheet.getRow(9).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " app012SA 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app012PG").toString()) != sheet.getRow(9).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " app012PG 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app012Past").toString()) != sheet.getRow(9).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app012Past 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app012Accept").toString()) != sheet.getRow(9).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app012Accept 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app012Finish").toString()) != sheet.getRow(9).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app012Finish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app012NotFinish").toString()) != sheet.getRow(9).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app012NotFinish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app012CodeNum").toString()) != sheet.getRow(9).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app012CodeNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app012DocNum").toString()) != sheet.getRow(9).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app012DocNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app012SA").toString()) != sheet.getRow(9).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app012SA 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app012PG").toString()) != sheet.getRow(9).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app012PG 數值錯誤!");
 
-		if(Double.parseDouble(maintainRS.get("app013Past").toString()) != sheet.getRow(11).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " app013Past 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app013Accept").toString()) != sheet.getRow(11).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " app013Accept 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app013Finish").toString()) != sheet.getRow(11).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " app013Finish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app013NotFinish").toString()) != sheet.getRow(11).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " app013NotFinish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app013CodeNum").toString()) != sheet.getRow(11).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " app013CodeNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app013DocNum").toString()) != sheet.getRow(11).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " app013DocNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app013SA").toString()) != sheet.getRow(11).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " app013SA 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app013PG").toString()) != sheet.getRow(11).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " app013PG 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app013Past").toString()) != sheet.getRow(11).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app013Past 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app013Accept").toString()) != sheet.getRow(11).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app013Accept 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app013Finish").toString()) != sheet.getRow(11).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app013Finish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app013NotFinish").toString()) != sheet.getRow(11).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app013NotFinish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app013CodeNum").toString()) != sheet.getRow(11).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app013CodeNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app013DocNum").toString()) != sheet.getRow(11).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app013DocNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app013SA").toString()) != sheet.getRow(11).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app013SA 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app013PG").toString()) != sheet.getRow(11).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app013PG 數值錯誤!");
 
-		if(Double.parseDouble(maintainRS.get("app014Past").toString()) != sheet.getRow(12).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " app014Past 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app014Accept").toString()) != sheet.getRow(12).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " app014Accept 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app014Finish").toString()) != sheet.getRow(12).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " app014Finish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app014NotFinish").toString()) != sheet.getRow(12).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " app014NotFinish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app014CodeNum").toString()) != sheet.getRow(12).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " app014CodeNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app014DocNum").toString()) != sheet.getRow(12).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " app014DocNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app014SA").toString()) != sheet.getRow(12).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " app014SA 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app014PG").toString()) != sheet.getRow(12).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " app014PG 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app014Past").toString()) != sheet.getRow(12).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app014Past 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app014Accept").toString()) != sheet.getRow(12).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app014Accept 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app014Finish").toString()) != sheet.getRow(12).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app014Finish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app014NotFinish").toString()) != sheet.getRow(12).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app014NotFinish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app014CodeNum").toString()) != sheet.getRow(12).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app014CodeNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app014DocNum").toString()) != sheet.getRow(12).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app014DocNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app014SA").toString()) != sheet.getRow(12).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app014SA 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app014PG").toString()) != sheet.getRow(12).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app014PG 數值錯誤!");
 
-		if(Double.parseDouble(maintainRS.get("app015Past").toString()) != sheet.getRow(13).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " app015Past 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app015Accept").toString()) != sheet.getRow(13).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " app015Accept 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app015Finish").toString()) != sheet.getRow(13).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " app015Finish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app015NotFinish").toString()) != sheet.getRow(13).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " app015NotFinish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app015CodeNum").toString()) != sheet.getRow(13).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " app015CodeNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app015DocNum").toString()) != sheet.getRow(13).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " app015DocNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app015SA").toString()) != sheet.getRow(13).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " app015SA 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app015PG").toString()) != sheet.getRow(13).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " app015PG 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app015Past").toString()) != sheet.getRow(13).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app015Past 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app015Accept").toString()) != sheet.getRow(13).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app015Accept 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app015Finish").toString()) != sheet.getRow(13).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app015Finish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app015NotFinish").toString()) != sheet.getRow(13).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app015NotFinish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app015CodeNum").toString()) != sheet.getRow(13).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app015CodeNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app015DocNum").toString()) != sheet.getRow(13).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app015DocNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app015SA").toString()) != sheet.getRow(13).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app015SA 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app015PG").toString()) != sheet.getRow(13).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app015PG 數值錯誤!");
 
-		if(Double.parseDouble(maintainRS.get("app018Past").toString()) != sheet.getRow(14).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " app018Past 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app018Accept").toString()) != sheet.getRow(14).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " app018Accept 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app018Finish").toString()) != sheet.getRow(14).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " app018Finish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app018NotFinish").toString()) != sheet.getRow(14).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " app018NotFinish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app018CodeNum").toString()) != sheet.getRow(14).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " app018CodeNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app018DocNum").toString()) != sheet.getRow(14).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " app018DocNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app018SA").toString()) != sheet.getRow(14).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " app018SA 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app018PG").toString()) != sheet.getRow(14).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " app018PG 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app018Past").toString()) != sheet.getRow(14).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app018Past 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app018Accept").toString()) != sheet.getRow(14).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app018Accept 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app018Finish").toString()) != sheet.getRow(14).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app018Finish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app018NotFinish").toString()) != sheet.getRow(14).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app018NotFinish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app018CodeNum").toString()) != sheet.getRow(14).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app018CodeNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app018DocNum").toString()) != sheet.getRow(14).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app018DocNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app018SA").toString()) != sheet.getRow(14).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app018SA 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app018PG").toString()) != sheet.getRow(14).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app018PG 數值錯誤!");
 
-		if(Double.parseDouble(maintainRS.get("app019Past").toString()) != sheet.getRow(15).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " app019Past 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app019Accept").toString()) != sheet.getRow(15).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " app019Accept 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app019Finish").toString()) != sheet.getRow(15).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " app019Finish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app019NotFinish").toString()) != sheet.getRow(15).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " app019NotFinish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app019CodeNum").toString()) != sheet.getRow(15).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " app019CodeNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app019DocNum").toString()) != sheet.getRow(15).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " app019DocNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app019SA").toString()) != sheet.getRow(15).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " app019SA 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("app019PG").toString()) != sheet.getRow(15).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " app019PG 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app019Past").toString()) != sheet.getRow(15).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app019Past 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app019Accept").toString()) != sheet.getRow(15).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app019Accept 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app019Finish").toString()) != sheet.getRow(15).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app019Finish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app019NotFinish").toString()) != sheet.getRow(15).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app019NotFinish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app019CodeNum").toString()) != sheet.getRow(15).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app019CodeNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app019DocNum").toString()) != sheet.getRow(15).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app019DocNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app019SA").toString()) != sheet.getRow(15).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app019SA 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("app019PG").toString()) != sheet.getRow(15).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " app019PG 數值錯誤!");
 
-		if(Double.parseDouble(maintainRS.get("tool010Past").toString()) != sheet.getRow(22).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " tool010Past 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool010Accept").toString()) != sheet.getRow(22).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " tool010Accept 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool010Finish").toString()) != sheet.getRow(22).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " tool010Finish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool010NotFinish").toString()) != sheet.getRow(22).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " tool010NotFinish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool010CodeNum").toString()) != sheet.getRow(22).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " tool010CodeNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool010DocNum").toString()) != sheet.getRow(22).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " tool010DocNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool010SA").toString()) != sheet.getRow(22).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " tool010SA 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool010PG").toString()) != sheet.getRow(22).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " tool010PG 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool010Past").toString()) != sheet.getRow(22).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool010Past 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool010Accept").toString()) != sheet.getRow(22).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool010Accept 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool010Finish").toString()) != sheet.getRow(22).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool010Finish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool010NotFinish").toString()) != sheet.getRow(22).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool010NotFinish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool010CodeNum").toString()) != sheet.getRow(22).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool010CodeNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool010DocNum").toString()) != sheet.getRow(22).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool010DocNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool010SA").toString()) != sheet.getRow(22).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool010SA 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool010PG").toString()) != sheet.getRow(22).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool010PG 數值錯誤!");
 
-		if(Double.parseDouble(maintainRS.get("tool011Past").toString()) != sheet.getRow(24).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " tool011Past 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool011Accept").toString()) != sheet.getRow(24).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " tool011Accept 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool011Finish").toString()) != sheet.getRow(24).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " tool011Finish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool011NotFinish").toString()) != sheet.getRow(24).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " tool011NotFinish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool011CodeNum").toString()) != sheet.getRow(24).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " tool011CodeNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool011DocNum").toString()) != sheet.getRow(24).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " tool011DocNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool011SA").toString()) != sheet.getRow(24).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " tool011SA 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool011PG").toString()) != sheet.getRow(24).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " tool011PG 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool011Past").toString()) != sheet.getRow(24).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool011Past 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool011Accept").toString()) != sheet.getRow(24).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool011Accept 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool011Finish").toString()) != sheet.getRow(24).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool011Finish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool011NotFinish").toString()) != sheet.getRow(24).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool011NotFinish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool011CodeNum").toString()) != sheet.getRow(24).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool011CodeNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool011DocNum").toString()) != sheet.getRow(24).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool011DocNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool011SA").toString()) != sheet.getRow(24).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool011SA 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool011PG").toString()) != sheet.getRow(24).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool011PG 數值錯誤!");
 
-		if(Double.parseDouble(maintainRS.get("tool012Past").toString()) != sheet.getRow(25).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " tool012Past 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool012Accept").toString()) != sheet.getRow(25).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " tool012Accept 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool012Finish").toString()) != sheet.getRow(25).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " tool012Finish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool012NotFinish").toString()) != sheet.getRow(25).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " tool012NotFinish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool012CodeNum").toString()) != sheet.getRow(25).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " tool012CodeNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool012DocNum").toString()) != sheet.getRow(25).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " tool012DocNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool012SA").toString()) != sheet.getRow(25).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " tool012SA 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool012PG").toString()) != sheet.getRow(25).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " tool012PG 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool012Past").toString()) != sheet.getRow(25).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool012Past 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool012Accept").toString()) != sheet.getRow(25).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool012Accept 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool012Finish").toString()) != sheet.getRow(25).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool012Finish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool012NotFinish").toString()) != sheet.getRow(25).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool012NotFinish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool012CodeNum").toString()) != sheet.getRow(25).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool012CodeNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool012DocNum").toString()) != sheet.getRow(25).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool012DocNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool012SA").toString()) != sheet.getRow(25).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool012SA 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool012PG").toString()) != sheet.getRow(25).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool012PG 數值錯誤!");
 
-		if(Double.parseDouble(maintainRS.get("tool018Past").toString()) != sheet.getRow(27).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " tool018Past 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool018Accept").toString()) != sheet.getRow(27).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " tool018Accept 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool018Finish").toString()) != sheet.getRow(27).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " tool018Finish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool018NotFinish").toString()) != sheet.getRow(27).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " tool018NotFinish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool018CodeNum").toString()) != sheet.getRow(27).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " tool018CodeNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool018DocNum").toString()) != sheet.getRow(27).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " tool018DocNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool018SA").toString()) != sheet.getRow(27).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " tool018SA 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool018PG").toString()) != sheet.getRow(27).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " tool018PG 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool018Past").toString()) != sheet.getRow(27).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool018Past 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool018Accept").toString()) != sheet.getRow(27).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool018Accept 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool018Finish").toString()) != sheet.getRow(27).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool018Finish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool018NotFinish").toString()) != sheet.getRow(27).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool018NotFinish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool018CodeNum").toString()) != sheet.getRow(27).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool018CodeNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool018DocNum").toString()) != sheet.getRow(27).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool018DocNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool018SA").toString()) != sheet.getRow(27).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool018SA 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool018PG").toString()) != sheet.getRow(27).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool018PG 數值錯誤!");
 
-		if(Double.parseDouble(maintainRS.get("tool019Past").toString()) != sheet.getRow(28).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " tool019Past 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool019Accept").toString()) != sheet.getRow(28).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " tool019Accept 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool019Finish").toString()) != sheet.getRow(28).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " tool019Finish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool019NotFinish").toString()) != sheet.getRow(28).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " tool019NotFinish 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool019CodeNum").toString()) != sheet.getRow(28).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " tool019CodeNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool019DocNum").toString()) != sheet.getRow(28).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " tool019DocNum 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool019SA").toString()) != sheet.getRow(28).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " tool019SA 數值錯誤!");
-		if(Double.parseDouble(maintainRS.get("tool019PG").toString()) != sheet.getRow(28).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " tool019PG 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool019Past").toString()) != sheet.getRow(28).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool019Past 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool019Accept").toString()) != sheet.getRow(28).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool019Accept 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool019Finish").toString()) != sheet.getRow(28).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool019Finish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool019NotFinish").toString()) != sheet.getRow(28).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool019NotFinish 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool019CodeNum").toString()) != sheet.getRow(28).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool019CodeNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool019DocNum").toString()) != sheet.getRow(28).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool019DocNum 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool019SA").toString()) != sheet.getRow(28).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool019SA 數值錯誤!");
+		if(Double.parseDouble(maintainRS.get("tool019PG").toString()) != sheet.getRow(28).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " tool019PG 數值錯誤!");
 
 		// 驗證彙總表的總計欄位內容
-		if(Double.parseDouble(maintainRS.get("appCountPast").toString()) != sheet.getRow(17).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " APP 上期未完成件數 總計錯誤!");
-		if(Double.parseDouble(maintainRS.get("appCountAccept").toString()) != sheet.getRow(17).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " APP 受理件數 總計錯誤!");
-		if(Double.parseDouble(maintainRS.get("appCountFinish").toString()) != sheet.getRow(17).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " APP 完成件數 總計錯誤!");
-		if(Double.parseDouble(maintainRS.get("appCountNotFinish").toString()) != sheet.getRow(17).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " APP 未完成件數 總計錯誤!");
-		if(Double.parseDouble(maintainRS.get("appCountCodeNum").toString()) != sheet.getRow(17).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " APP 程式支數 總計錯誤!");
-		if(Double.parseDouble(maintainRS.get("appCountDocNum").toString()) != sheet.getRow(17).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " APP 文件數 總計錯誤!");
-		if(Double.parseDouble(maintainRS.get("appCountSA").toString()) != sheet.getRow(17).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " APP 系統分析人時 總計錯誤!");
-		if(Double.parseDouble(maintainRS.get("appCountPG").toString()) != sheet.getRow(17).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " APP 程式設計人時 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("appCountPast").toString()) != sheet.getRow(17).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " APP 上期未完成件數 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("appCountAccept").toString()) != sheet.getRow(17).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " APP 受理件數 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("appCountFinish").toString()) != sheet.getRow(17).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " APP 完成件數 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("appCountNotFinish").toString()) != sheet.getRow(17).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " APP 未完成件數 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("appCountCodeNum").toString()) != sheet.getRow(17).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " APP 程式支數 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("appCountDocNum").toString()) != sheet.getRow(17).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " APP 文件數 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("appCountSA").toString()) != sheet.getRow(17).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " APP 系統分析人時 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("appCountPG").toString()) != sheet.getRow(17).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " APP 程式設計人時 總計錯誤!");
 		
-		if(Double.parseDouble(maintainRS.get("toolCountPast").toString()) != sheet.getRow(30).getCell(2).getNumericCellValue()) throw new Exception(sheetName + " TOOL 上期未完成件數 總計錯誤!");
-		if(Double.parseDouble(maintainRS.get("toolCountAccept").toString()) != sheet.getRow(30).getCell(3).getNumericCellValue()) throw new Exception(sheetName + " TOOL 受理件數 總計錯誤!");
-		if(Double.parseDouble(maintainRS.get("toolCountFinish").toString()) != sheet.getRow(30).getCell(4).getNumericCellValue()) throw new Exception(sheetName + " TOOL 完成件數 總計錯誤!");
-		if(Double.parseDouble(maintainRS.get("toolCountNotFinish").toString()) != sheet.getRow(30).getCell(5).getNumericCellValue()) throw new Exception(sheetName + " TOOL 未完成件數 總計錯誤!");
-		if(Double.parseDouble(maintainRS.get("toolCountCodeNum").toString()) != sheet.getRow(30).getCell(10).getNumericCellValue()) throw new Exception(sheetName + " TOOL 程式支數 總計錯誤!");
-		if(Double.parseDouble(maintainRS.get("toolCountDocNum").toString()) != sheet.getRow(30).getCell(11).getNumericCellValue()) throw new Exception(sheetName + " TOOL 文件數 總計錯誤!");
-		if(Double.parseDouble(maintainRS.get("toolCountSA").toString()) != sheet.getRow(30).getCell(12).getNumericCellValue()) throw new Exception(sheetName + " TOOL 系統分析人時 總計錯誤!");
-		if(Double.parseDouble(maintainRS.get("toolCountPG").toString()) != sheet.getRow(30).getCell(13).getNumericCellValue()) throw new Exception(sheetName + " TOOL 程式設計人時 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("toolCountPast").toString()) != sheet.getRow(30).getCell(2).getNumericCellValue()) System.out.println("ERR: " + sheetName + " TOOL 上期未完成件數 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("toolCountAccept").toString()) != sheet.getRow(30).getCell(3).getNumericCellValue()) System.out.println("ERR: " + sheetName + " TOOL 受理件數 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("toolCountFinish").toString()) != sheet.getRow(30).getCell(4).getNumericCellValue()) System.out.println("ERR: " + sheetName + " TOOL 完成件數 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("toolCountNotFinish").toString()) != sheet.getRow(30).getCell(5).getNumericCellValue()) System.out.println("ERR: " + sheetName + " TOOL 未完成件數 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("toolCountCodeNum").toString()) != sheet.getRow(30).getCell(10).getNumericCellValue()) System.out.println("ERR: " + sheetName + " TOOL 程式支數 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("toolCountDocNum").toString()) != sheet.getRow(30).getCell(11).getNumericCellValue()) System.out.println("ERR: " + sheetName + " TOOL 文件數 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("toolCountSA").toString()) != sheet.getRow(30).getCell(12).getNumericCellValue()) System.out.println("ERR: " + sheetName + " TOOL 系統分析人時 總計錯誤!");
+		if(Double.parseDouble(maintainRS.get("toolCountPG").toString()) != sheet.getRow(30).getCell(13).getNumericCellValue()) System.out.println("ERR: " + sheetName + " TOOL 程式設計人時 總計錯誤!");
 
 	}
 	
@@ -366,17 +361,18 @@ public class MonthReport {
 				else
 					totalFinishNum++;
 						
-				errMsgTitle = sheetName + " 序號" + (row.getRowNum() - 5 + 1) + "驗證失敗: ";
+				errMsgTitle = "ERR: " + sheetName + " 序號" + (row.getRowNum() - 5 + 1) + "驗證失敗: ";
 				validResult = MonthReportTools.getValidResult(acceptDate, replyDate, dueDate, actDate, issueType);
 				if(validResult.startsWith("ERR"))
-					throw new Exception(errMsgTitle + validResult);
+					System.out.println(errMsgTitle + validResult);
 
 				if(("app".equals(module) && !"Y".equals(isPay)) || ("tool".equals(module) && !"N".equals(isPay)))
-					throw new Exception(errMsgTitle + "列入核銷結果錯誤");
-				
+					System.out.println(errMsgTitle + "列入核銷結果錯誤");
+				if(actDate != null && MonthReportTools.isFutureDate(actDate))
+					System.out.println(errMsgTitle + "actDate欄位應清空");
 				if ((actDate == null || (actDate != null && MonthReportTools.isFutureDate(actDate)))
 						&& !"0.00.0".equals(notFinish))
-					throw new Exception(errMsgTitle + "notFinish後面欄位未清空");
+					System.out.println(errMsgTitle + "notFinish後面欄位未清空");
 				
 				// ============================ 計算彙總筆數 =======================================
 
@@ -677,9 +673,9 @@ public class MonthReport {
 //System.out.println(summaryStr1);
 //System.out.println(summaryStr2);
 		if(!sheetSummaryStr1.equals(summaryStr1))
-			throw new Exception(sheetName + " 彙總資訊錯誤:完成件數");
+			System.out.println("ERR: " + sheetName + " 彙總資訊錯誤:完成件數");
 		if(!sheetSummaryStr2.equals(summaryStr2))
-			throw new Exception(sheetName + " 彙總資訊錯誤:程式支數");
+			System.out.println("ERR: " + sheetName + " 彙總資訊錯誤:程式支數");
 
 System.out.println(
 		"\r\n, app010Past = "+app010Past+", app010Accept = "+app010Accept+", app010Finish = "+app010Finish+", app010NotFinish = "+app010NotFinish+", app010CodeNum = "+app010CodeNum+", app010DocNum = "+app010DocNum+", app010SA = "+app010SA+", app010PG = "+app010PG

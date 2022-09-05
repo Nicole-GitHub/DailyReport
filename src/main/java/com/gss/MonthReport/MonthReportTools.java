@@ -108,7 +108,7 @@ public class MonthReportTools {
 	 */
 	protected static boolean isPastDate(Date acceptDate) {
 		Calendar initReportDate = Calendar.getInstance();
-		initReportDate.add(Calendar.MONTH, -2);
+		initReportDate.add(Calendar.MONTH, -1);
 		Calendar c = Calendar.getInstance();
 		c.setTime(acceptDate);
 //System.out.println("c:"+c.get(Calendar.YEAR)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.DATE));

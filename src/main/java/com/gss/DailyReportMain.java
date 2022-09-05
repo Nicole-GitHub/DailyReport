@@ -47,11 +47,11 @@ public class DailyReportMain {
 			String monthReportPath = "", maintainListExcel = "", monthReportExcel = "";
 			int lastMonthTotalFinishNum = 0, lastMonthTotalCodeNum = 0, lastMonth = 0;
 			
-			if (runType.equals("month")) { // 驗証月報內容
+			if (runType.equals("month") || runType.equals("maintain")) { // 驗証月報內容
 
 				if (!isStartupFromJar) {// IDE
-					lastMonthTotalFinishNum = 228;
-					lastMonthTotalCodeNum = 178;
+					lastMonthTotalFinishNum = 276;
+					lastMonthTotalCodeNum = 200;
 					lastMonth = 202208;
 				}
 				
@@ -63,16 +63,19 @@ public class DailyReportMain {
 				try (Scanner s =  isStartupFromJar ? new Scanner(System.in, "big5") : new Scanner(System.in)) {
 					System.out.println("請輸入 月報月份(yyyymm): ");
 					lastMonth = lastMonth == 0 ? s.nextInt() : lastMonth;
-					System.out.println("請輸入 上月累計已完成件數: ");
-					lastMonthTotalFinishNum = lastMonthTotalFinishNum == 0 ? s.nextInt() : lastMonthTotalFinishNum;
-					System.out.println("請輸入 上月累計程式支數: ");
-					lastMonthTotalCodeNum = lastMonthTotalCodeNum == 0 ? s.nextInt() : lastMonthTotalCodeNum;
+					if (runType.equals("month")) {
+						System.out.println("請輸入 上月累計已完成件數: ");
+						lastMonthTotalFinishNum = lastMonthTotalFinishNum == 0 ? s.nextInt() : lastMonthTotalFinishNum;
+						System.out.println("請輸入 上月累計程式支數: ");
+						lastMonthTotalCodeNum = lastMonthTotalCodeNum == 0 ? s.nextInt() : lastMonthTotalCodeNum;
+					}
 				}
 				
 				// 月報放置路徑與檔名
 				monthReportPath = mapProp.get("MonthReportPath") + lastMonth + "/";
 				maintainListExcel = path + monthReportPath + mapProp.get("MaintainListExcel") + lastMonth + ".xlsx";
 				monthReportExcel = path + monthReportPath + mapProp.get("MonthReportExcel") + (lastMonth-191100) + ".xlsx";
+				System.out.println("monthReportPath: " + monthReportPath);
 				System.out.println("維護問題紀錄單Excel: " + maintainListExcel);
 				System.out.println("月報Excel: " + monthReportExcel);
 				
