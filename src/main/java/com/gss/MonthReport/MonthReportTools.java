@@ -12,7 +12,7 @@ import org.apache.poi.ss.usermodel.Cell;
 
 public class MonthReportTools {
 	
-	private static long diffrence;
+	private static long diffReplyAccept, diffActDue, diffReplyDue, diffReplyAct;
 	private static final TimeUnit time = TimeUnit.MINUTES;
 	private static final List<String> listIssueType1 = Arrays.asList(new String[] { "010" });
 	private static final List<String> listIssueType2 = Arrays.asList(new String[] { "011", "012" });
@@ -47,17 +47,23 @@ public class MonthReportTools {
 			int holiday = getHoliday(acceptDate, replyDate);
 			// 受理時間為中午前則當天需算1個工作天
 			int isAM = acceptDate.getHours() < 12 ? 1 : 0;
-			diffrence = time.convert(replyDate.getTime() - acceptDate.getTime(), TimeUnit.MILLISECONDS);
-			if ((listIssueType1.contains(issueType) && diffrence / 60f / 24f > 2 + holiday - isAM)
-					|| (listIssueType2.contains(issueType) && diffrence / 60f > 4)
-					|| (listIssueType3.contains(issueType) && diffrence / 60f / 24f > 3 + holiday - isAM)) {
+			diffReplyAccept = time.convert(replyDate.getTime() - acceptDate.getTime(), TimeUnit.MILLISECONDS);
+			diffReplyDue = time.convert(replyDate.getTime() - dueDate.getTime(), TimeUnit.MILLISECONDS);
+			if ((listIssueType1.contains(issueType) && diffReplyAccept / 60f / 24f > 2 + holiday - isAM)
+					|| (listIssueType2.contains(issueType) && diffReplyAccept / 60f > 4)
+					|| (listIssueType3.contains(issueType) && diffReplyAccept / 60f / 24f > 3 + holiday - isAM)) {
 				validResult = "ERR-受理時間 & 回應時間 需根據問題類型去判斷";
-			} else if (diffrence <= 0) {
-				validResult = "ERR-回應時間 - 受理時間 需大於等於 1";
+			} else if (diffReplyAccept <= 0) {
+				validResult = "ERR-回應時間 不可早於 受理時間";
+			} else if (diffReplyDue / 60f / 24f >= 1) {
+				validResult = "ERR-到期日 不可早於 回應日";
 			} else if (actDate != null) {
-				diffrence = time.convert(actDate.getTime() - dueDate.getTime(), TimeUnit.MILLISECONDS);
-				if (diffrence / 60f / 24f >= 1) {
-					validResult = "ERR-到期日不可早於實際完成日";
+				diffActDue = time.convert(actDate.getTime() - dueDate.getTime(), TimeUnit.MILLISECONDS);
+				diffReplyAct = time.convert(replyDate.getTime() - actDate.getTime(), TimeUnit.MILLISECONDS);
+				if (diffActDue / 60f / 24f >= 1) {
+					validResult = "ERR-到期日 不可早於 實際完成日";
+				} else if (diffReplyAct / 60f / 24f >= 1) {
+					validResult = "ERR-實際完成日 不可早於 回應日";
 				} else
 					validResult = "Normal";
 			}else
