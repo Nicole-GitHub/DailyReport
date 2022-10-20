@@ -24,8 +24,9 @@ public class DailyReportMain {
 //			System.out.println("9:"+ System.getProperty("java.class.path"));
 
 			String os = System.getProperty("os.name");
+			boolean isCompany = "GSS".equals(args[0].toUpperCase()) ? true : false;
 			System.out.println("=== NOW TIME ===> " + new Date());
-			System.out.println("===os.name===> " + os);
+			System.out.println("===os.name===> " + os + ", isCompany:" + isCompany);
 			
 			// 判斷當前執行的啟動方式是IDE還是jar
 			boolean isStartupFromJar = new File(DailyReportMain.class.getProtectionDomain().getCodeSource().getLocation().getPath()).isFile();
@@ -99,7 +100,7 @@ public class DailyReportMain {
 				boolean done = false;
 				do {
 					try {
-						RunDailyReport.runDailyReport(path);
+						RunDailyReport.runDailyReport(path, isCompany);
 						done = true;
 					} catch (Exception e) {
 						System.out.println(new Date() + " ===> " + e.getMessage());

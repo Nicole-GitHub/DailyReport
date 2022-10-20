@@ -43,7 +43,7 @@ public class RunDailyReport {
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	public static void runDailyReport(String path) throws Exception {
+	public static void runDailyReport(String path, boolean isCompany) throws Exception {
 
 		Map<String, String> mapProp = Property.getProperties(path);
 		
@@ -79,7 +79,7 @@ public class RunDailyReport {
 		OutputStream output = null;
 		try {
 			// 整理 MAIL內容
-			parserMailContent(path);
+			parserMailContent(path, isCompany);
 
 			File f = new File(DailyReportExcelSource);
 			workbook = Tools.getWorkbook(DailyReportExcelSource, f);
@@ -144,7 +144,7 @@ public class RunDailyReport {
 	 *         map.put("jobRunRS", jobRunRS); // 執行結果
 	 * @throws Exception 
 	 */
-	private static void parserMailContent(String path) throws Exception {
+	private static void parserMailContent(String path, boolean isCompany) throws Exception {
 		boolean isPm = false;
 		int hhInt = 0, arrLen = 0;
 		String jobRSText = "", jobRSDate = "", jobRSOriDate = "", jobRSTime = "", jobPeriod = "",
@@ -166,7 +166,7 @@ public class RunDailyReport {
 
 		// listMail
 		cal.setTime(Tools.getString2Date(String.valueOf(chkDate), "yyyyMMdd"));
-		listMail = Selenium_Crawler.getMailContent(path, inboxName, account, pwd, cal, listFforSheet3);
+		listMail = Selenium_Crawler.getMailContent(path, inboxName, account, pwd, cal, listFforSheet3, isCompany);
 
 		for (Map<String, String> mailMap : listMail) {
 
