@@ -52,7 +52,7 @@ public class DailyReportMain {
 				if (!isStartupFromJar) {// IDE
 					lastMonthTotalFinishNum = 276;
 					lastMonthTotalCodeNum = 200;
-					lastMonth = 202208;
+					lastMonth = 202210;
 				}
 				
 				/**

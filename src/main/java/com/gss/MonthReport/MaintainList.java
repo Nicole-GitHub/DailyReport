@@ -271,6 +271,7 @@ System.out.println("IA2 Done !");
 
 //System.out.println("row.getRowNum():"+row.getRowNum() );
 				for (int c = 0; c < row.getLastCellNum(); c++) {
+//System.out.println("getCell:"+c);
 					if (row.getCell(c) != null && row.getCell(c).toString().length() > 0) {
 						if (c == 4 || c == 5) {
 							date = row.getCell(c).getDateCellValue();
