@@ -24,7 +24,12 @@ public class DailyReportMain {
 //			System.out.println("9:"+ System.getProperty("java.class.path"));
 
 			String os = System.getProperty("os.name");
-			boolean isCompany = "GSS".equals(args[0].toUpperCase()) ? true : false;
+
+			System.out.println(args.length);
+			boolean isCompany = (args.length > 0 && "GSS".equals(args[0].toUpperCase())) ? true : false;
+			if(args.length == 0)
+				isCompany = true;
+			
 			System.out.println("=== NOW TIME ===> " + new Date());
 			System.out.println("===os.name===> " + os + ", isCompany:" + isCompany);
 			
@@ -35,7 +40,7 @@ public class DailyReportMain {
 			String path = System.getProperty("user.dir") + File.separator; // Jar
 			if(!isStartupFromJar) // IDE
 				path = os.contains("Mac") ? "/Users/nicole/Dropbox/DailyReport/" // Mac
-						: "C:/Users/Nicole/Dropbox/DailyReport/"; // win
+						: "C:/Users/nicole_tsou/Dropbox/DailyReport/"; // win
 			
 			System.out.println("path: " + path);
 			Map<String, String> mapProp = Property.getProperties(path);
