@@ -38,7 +38,7 @@ public class Selenium_Crawler {
 
 	protected static List<Map<String, String>> getMailContent(
 			String path, String[] inboxName, String account,
-			String pwd, Calendar cal, ArrayList<TreeMap<String, String>> listFforSheet3) throws Exception {
+			String pwd, Calendar cal, ArrayList<TreeMap<String, String>> listFforSheet3, boolean isCompany) throws Exception {
 		
 		driver = null;
 		List<WebElement> listElement;
@@ -64,7 +64,8 @@ public class Selenium_Crawler {
 		String chromeDriverVersion = mapProp.get("chromeDriverVersion");
 		String chromeDefaultDownloadPath = os.contains("Mac")
 				? mapProp.get("chromeDefaultDownloadPathMac")
-				: mapProp.get("chromeDefaultDownloadPathWindows");
+				: isCompany ? mapProp.get("chromeDefaultDownloadPathWindowsGSS")
+						: mapProp.get("chromeDefaultDownloadPathWindows");
 				
 		String chromeDriver = path + chromeDriverPath + chromeDriverName + "_" + chromeDriverVersion
 				+ (os.contains("Mac") ? "" : ".exe");
