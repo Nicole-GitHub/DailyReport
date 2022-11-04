@@ -40,7 +40,8 @@ public class DailyReportMain {
 			String path = System.getProperty("user.dir") + File.separator; // Jar
 			if(!isStartupFromJar) // IDE
 				path = os.contains("Mac") ? "/Users/nicole/Dropbox/DailyReport/" // Mac
-						: "C:/Users/nicole_tsou/Dropbox/DailyReport/"; // win
+						: isCompany ? "C:/Users/nicole_tsou/Dropbox/DailyReport/"
+								: "C:/Users/Nicole/Dropbox/DailyReport/"; // win
 			
 			System.out.println("path: " + path);
 			Map<String, String> mapProp = Property.getProperties(path);
