@@ -28,7 +28,7 @@ public class DailyReportMain {
 			System.out.println(args.length);
 			boolean isCompany = (args.length > 0 && "GSS".equals(args[0].toUpperCase())) ? true : false;
 			if(args.length == 0)
-				isCompany = true;
+				isCompany = false;
 			
 			System.out.println("=== NOW TIME ===> " + new Date());
 			System.out.println("===os.name===> " + os + ", isCompany:" + isCompany);

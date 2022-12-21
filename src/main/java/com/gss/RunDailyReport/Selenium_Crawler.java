@@ -275,7 +275,7 @@ public class Selenium_Crawler {
 		else if (jobRSOriDateInt == chkDate) {
 			if (jobRSTime.contains("下午"))
 				result = true;
-			else if (jobRSTimeHH >= 9)
+			else if (jobRSTimeHH >= 9 && jobRSTimeHH < 12)
 				result = true;
 		}
 		return result;
